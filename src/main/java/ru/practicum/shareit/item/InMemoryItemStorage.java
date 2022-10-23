@@ -78,8 +78,8 @@ public class InMemoryItemStorage {
     public List<Item> search(String query) {
         return items.values().stream()
                 .filter(x -> (((x.getName().toLowerCase().contains(query))
-                        | x.getDescription().toLowerCase().contains(query))
-                        & (x.getAvailable())))
+                        || x.getDescription().toLowerCase().contains(query))
+                        && (x.getAvailable())))
                 .collect(Collectors.toList());
     }
 
