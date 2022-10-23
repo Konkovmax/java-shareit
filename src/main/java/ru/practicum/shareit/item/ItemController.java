@@ -3,21 +3,16 @@ package ru.practicum.shareit.item;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserDto;
-import ru.practicum.shareit.user.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequestMapping("/items")
 public class ItemController {
-    private final ItemService itemService;
+    private final ItemServiceImpl itemService;
 
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemServiceImpl itemService) {
         this.itemService = itemService;
     }
 
@@ -33,7 +28,7 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam(value = "text", required = true) String query){
+    public List<ItemDto> search(@RequestParam(value = "text", required = true) String query) {
         return itemService.search(query);
     }
 
@@ -46,7 +41,7 @@ public class ItemController {
     public ItemDto update(@PathVariable int id,
                           @RequestBody Item item,
                           @RequestHeader(value = "X-Sharer-User-Id", required = true) int userId) {
-        return itemService.update(id,item, userId);
+        return itemService.update(id, item, userId);
     }
 
     @DeleteMapping(value = "/{id}")
