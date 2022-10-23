@@ -5,25 +5,26 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.UserDto;
+import ru.practicum.shareit.item.model.Item;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class InMemoryItemStorage {
-    public Map<Integer, ItemDto> items = new HashMap<>();
+    public Map<Integer, Item> items = new HashMap<>();
     private int id = 1;
 
-    public ItemDto create(ItemDto item, int userId) {
+    public ItemDto create(Item item) {
         // throwIfNotValid(item);
         item.setId(id);
         generateId();
         items.put(item.getId(), item);
-        return item;
+        return ItemMapper.toItemDto(item);
     }
 
     public void delete(int itemId) {
@@ -38,8 +39,8 @@ public class InMemoryItemStorage {
         }
     }
 
-    public boolean throwIfNotValid(ItemDto newItem) throws BadRequestException {
-//        for (ItemDto item: items.values()) {
+    public boolean throwIfNotValid(Item newItem) throws BadRequestException {
+//        for (Item item: items.values()) {
 //            if (item.getEmail().equals(newItem.getEmail())) {
 //                log.error("Duplicated Email");
 //                throw new BadRequestException("Email can't duplicated");
@@ -64,8 +65,8 @@ public class InMemoryItemStorage {
         return true;
 
     }
-    public ItemDto update(int id, ItemDto item) {
-        ItemDto updateItem = new ItemDto();
+    public Item update(int id, Item item) {
+        Item updateItem = new Item();
         if (items.containsKey(id)) {
             updateItem= items.get(id);
             updateItem.setId(id);
@@ -91,7 +92,7 @@ public class InMemoryItemStorage {
         return updateItem;
     }
 
-    public ItemDto getItem(int itemId) {
+    public Item getItem(int itemId) {
         if (!items.containsKey(itemId)) {
             log.warn("item not found");
             throw new NotFoundException(String.format(
@@ -101,8 +102,31 @@ public class InMemoryItemStorage {
         return items.get(itemId);
     }
 
-    public List<ItemDto> getAll() {
-        return new ArrayList<>(items.values());
+    public List<Item> getAll(int userId) {
+        return new ArrayList<>(items.values().stream().filter(x->x.getOwner().getId()==userId)
+                .collect(Collectors.toList()));
+    }
+
+    public List<Item> search(String query) {
+
+//      //  for (Item x:items.values()){
+//String s1 = " дрель  аккумуляторная";
+//String s2 = "Аккумуляторная";
+//           if ((x.getName().toLowerCase().contains(query))
+//                    |x.getDescription().toLowerCase().contains(query))
+//            Boolean b = s1.matches("(?i).*" + s2 + ".*");
+//            if (s1.matches("(?i).*" + s2 + ".*"))
+//
+//            {
+//
+//            log.warn("ok");
+//            }
+       //
+        return new ArrayList<>(items.values().stream()
+                .filter(x->(((x.getName().toLowerCase().contains(query))
+                    |x.getDescription().toLowerCase().contains(query))
+                &(x.getAvailable()==true)))
+                .collect(Collectors.toList()));
     }
 
     public void generateId() {

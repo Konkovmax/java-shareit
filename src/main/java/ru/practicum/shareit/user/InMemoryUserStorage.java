@@ -15,10 +15,10 @@ import java.util.Map;
 @Component
 @Slf4j
 public class InMemoryUserStorage {
-    public Map<Integer, UserDto> users = new HashMap<>();
+    public Map<Integer, User> users = new HashMap<>();
     private int id = 1;
 
-    public UserDto create(UserDto user) {
+    public User create(User user) {
         throwIfNotValid(user);
         user.setId(id);
         generateId();
@@ -38,8 +38,8 @@ public class InMemoryUserStorage {
         }
     }
 
-    public boolean throwIfNotValid(UserDto newUser) throws BadRequestException {
-        for (UserDto user:users.values()) {
+    public boolean throwIfNotValid(User newUser) throws BadRequestException {
+        for (User user:users.values()) {
             if (user.getEmail().equals(newUser.getEmail())) {
                 log.error("Duplicated Email");
                 throw new ConflictException("Email can't duplicated");
@@ -64,10 +64,10 @@ public class InMemoryUserStorage {
         return true;
 
     }
-    public UserDto update(int id, UserDto user) {
-        UserDto updateUser = new UserDto();
+    public User update(int id, User user) {
+        User updateUser = new User();
         if (users.containsKey(id)) {
-            for (UserDto userCheck:users.values()) {
+            for (User userCheck:users.values()) {
                 if (userCheck.getEmail().equals(user.getEmail())&userCheck.getId()!= user.getId()) {
                     log.error("Duplicated Email");
                     throw new ConflictException("Email can't duplicated");
@@ -94,7 +94,7 @@ public class InMemoryUserStorage {
         return updateUser;
     }
 
-    public UserDto getUser(int userId) {
+    public User getUser(int userId) {
         if (!users.containsKey(userId)) {
             log.warn("user not found");
             throw new NotFoundException(String.format(
@@ -104,7 +104,7 @@ public class InMemoryUserStorage {
         return users.get(userId);
     }
 
-    public List<UserDto> getAll() {
+    public List<User> getAll() {
         return new ArrayList<>(users.values());
     }
 

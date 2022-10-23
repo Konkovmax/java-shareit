@@ -8,15 +8,16 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class UserDto {
     private int id;
     private String name;
 
-    @Email
-    @NotEmpty
+//    @Email
+//    @NotEmpty
     private String email;
 
-    public UserDto(String name, String email) {
-    }
+//    public UserDto(String name, String email) {
+//    }
 }
