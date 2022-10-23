@@ -50,7 +50,7 @@ public class InMemoryUserStorage {
         User updateUser;
         if (users.containsKey(id)) {
             for (User userCheck : users.values()) {
-                if (userCheck.getEmail().equals(user.getEmail()) & userCheck.getId() != user.getId()) {
+                if (userCheck.getEmail().equals(user.getEmail()) && userCheck.getId() != user.getId()) {
                     log.error("Duplicated Email");
                     throw new ConflictException("Email can't duplicated");
                 }
