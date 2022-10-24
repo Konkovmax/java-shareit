@@ -13,8 +13,8 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public UserDto create(User user) {
-        return UserMapper.toUserDto(userStorage.create(user));
+    public UserDto create(UserDto user) {
+        return UserMapper.toUserDto(userStorage.create(UserMapper.toUser(user)));
     }
 
     public List<UserDto> getAll() {
@@ -23,8 +23,8 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public UserDto update(int id, User user) {
-        return UserMapper.toUserDto(userStorage.update(id, user));
+    public UserDto update(int id, UserDto user) {
+        return UserMapper.toUserDto(userStorage.update(id, UserMapper.toUser(user)));
     }
 
     public void delete(int userId) {

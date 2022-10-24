@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.InMemoryUserStorage;
 
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ public class ItemServiceImpl implements ItemService {
         this.userStorage = userStorage;
     }
 
-    public ItemDto create(Item item, int userId) {
+    public ItemDto create(ItemDto item, int userId) {
         if (!userStorage.users.containsKey(userId)) {
             log.warn("user not found");
             throw new NotFoundException(String.format(
@@ -30,7 +29,7 @@ public class ItemServiceImpl implements ItemService {
                     userId));
         }
         item.setOwner(userStorage.getUser(userId));
-        return itemStorage.create(item);
+        return itemStorage.create(ItemMapper.toItem(item));
     }
 
     public List<ItemDto> getAll(int userId) {
@@ -50,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    public ItemDto update(int id, Item item, int userId) {
+    public ItemDto update(int id, ItemDto item, int userId) {
         if (!userStorage.users.containsKey(userId)) {
             log.warn("user not found");
             throw new NotFoundException(String.format(
@@ -63,10 +62,22 @@ public class ItemServiceImpl implements ItemService {
                     "User with id: %s does not own this item",
                     userId));
         }
-        return ItemMapper.toItemDto(itemStorage.update(id, item));
+        if (!itemStorage.items.containsKey(id)) {
+            log.warn("item not found");
+            throw new NotFoundException(String.format(
+                    "Item with id: %s not found",
+                    id));
+        }
+        return ItemMapper.toItemDto(itemStorage.update(id, ItemMapper.toItem(item)));
     }
 
     public void delete(int itemId) {
+        if (itemStorage.items.containsKey(itemId)) {
+            log.warn("item not found");
+            throw new NotFoundException(String.format(
+                    "Item with id: %s not found",
+                    itemId));
+        }
         itemStorage.delete(itemId);
     }
 

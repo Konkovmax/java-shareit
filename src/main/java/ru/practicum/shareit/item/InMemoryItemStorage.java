@@ -25,38 +25,25 @@ public class InMemoryItemStorage {
     }
 
     public void delete(int itemId) {
-        if (items.containsKey(itemId)) {
-            log.warn("item not found");
-            throw new NotFoundException(String.format(
-                    "Item with id: %s not found",
-                    itemId));
-        }
         items.remove(itemId);
         log.info("Item deleted");
     }
 
     public Item update(int id, Item item) {
         Item updateItem;
-        if (items.containsKey(id)) {
-            updateItem = items.get(id);
-            updateItem.setId(id);
-            if (item.getName() != null) {
-                updateItem.setName(item.getName());
-            }
-            if (item.getDescription() != null) {
-                updateItem.setDescription(item.getDescription());
-            }
-            if (item.getAvailable() != null) {
-                updateItem.setAvailable(item.getAvailable());
-            }
-            items.put(id, updateItem);
-            log.info("Item updated");
-        } else {
-            log.warn("item not found");
-            throw new NotFoundException(String.format(
-                    "Item with id: %s not found",
-                    id));
+        updateItem = items.get(id);
+        updateItem.setId(id);
+        if (item.getName() != null) {
+            updateItem.setName(item.getName());
         }
+        if (item.getDescription() != null) {
+            updateItem.setDescription(item.getDescription());
+        }
+        if (item.getAvailable() != null) {
+            updateItem.setAvailable(item.getAvailable());
+        }
+        items.put(id, updateItem);
+        log.info("Item updated");
         return updateItem;
     }
 
@@ -71,7 +58,8 @@ public class InMemoryItemStorage {
     }
 
     public List<Item> getAll(int userId) {
-        return items.values().stream().filter(x -> x.getOwner().getId() == userId)
+        return items.values().stream()
+                .filter(x -> x.getOwner().getId() == userId)
                 .collect(Collectors.toList());
     }
 

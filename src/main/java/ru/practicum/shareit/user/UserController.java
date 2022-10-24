@@ -16,7 +16,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto create(@Valid @RequestBody User user) {
+    public UserDto create(@Valid @RequestBody UserDto user) {
         return userService.create(user);
     }
 
@@ -32,7 +32,7 @@ public class UserController {
 
     @PatchMapping("/{id}")
     public UserDto update(@PathVariable int id, //@Valid
-                          @RequestBody User user) {
+                          @RequestBody UserDto user) {
         return userService.update(id, user);
     }
 
