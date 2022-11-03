@@ -13,12 +13,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ItemServiceImpl implements ItemService {
-    private final InMemoryItemStorage itemStorage;
+    private final ItemRepository itemRepository;
     private final InMemoryUserStorage userStorage;
 
-    public ItemServiceImpl(InMemoryItemStorage itemStorage, InMemoryUserStorage userStorage) {
-        this.itemStorage = itemStorage;
+    public ItemServiceImpl(ItemRepository itemRepository, InMemoryUserStorage userStorage) {
+        this.itemRepository = itemRepository;
         this.userStorage = userStorage;
+
     }
 
     public ItemDto create(ItemDto item, int userId) {
@@ -29,11 +30,11 @@ public class ItemServiceImpl implements ItemService {
                     userId));
         }
         item.setOwner(userStorage.getUser(userId));
-        return itemStorage.create(ItemMapper.toItem(item));
+        return itemRepository.create(ItemMapper.toItem(item));
     }
 
     public List<ItemDto> getAll(int userId) {
-        return itemStorage.getAll(userId).stream()
+        return itemRepository.getAll(userId).stream()
                 .map(object -> ItemMapper.toItemDto(object))
                 .collect(Collectors.toList());
     }
@@ -43,7 +44,7 @@ public class ItemServiceImpl implements ItemService {
             return new ArrayList<>();
         } else {
             String adaptedQuery = query.toLowerCase();
-            return itemStorage.search(adaptedQuery).stream()
+            return itemRepository.search(adaptedQuery).stream()
                     .map(object -> ItemMapper.toItemDto(object))
                     .collect(Collectors.toList());
         }
@@ -56,32 +57,32 @@ public class ItemServiceImpl implements ItemService {
                     "User with id: %s not found",
                     userId));
         }
-        if (itemStorage.items.get(id).getOwner().getId() != userId) {
+        if (itemRepository.items.get(id).getOwner().getId() != userId) {
             log.warn("user mismatched");
             throw new NotFoundException(String.format(
                     "User with id: %s does not own this item",
                     userId));
         }
-        if (!itemStorage.items.containsKey(id)) {
+        if (!itemRepository.items.containsKey(id)) {
             log.warn("item not found");
             throw new NotFoundException(String.format(
                     "Item with id: %s not found",
                     id));
         }
-        return ItemMapper.toItemDto(itemStorage.update(id, ItemMapper.toItem(item)));
+        return ItemMapper.toItemDto(itemRepository.update(id, ItemMapper.toItem(item)));
     }
 
     public void delete(int itemId) {
-        if (itemStorage.items.containsKey(itemId)) {
+        if (itemRepository.items.containsKey(itemId)) {
             log.warn("item not found");
             throw new NotFoundException(String.format(
                     "Item with id: %s not found",
                     itemId));
         }
-        itemStorage.delete(itemId);
+        itemRepository.delete(itemId);
     }
 
     public ItemDto getItem(int itemId) {
-        return ItemMapper.toItemDto(itemStorage.getItem(itemId));
+        return ItemMapper.toItemDto(itemRepository.getItem(itemId));
     }
 }

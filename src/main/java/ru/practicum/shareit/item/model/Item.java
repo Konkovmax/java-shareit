@@ -6,15 +6,25 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
+import javax.persistence.*;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Entity
+
 public class Item {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
     private String description;
     private Boolean available;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User owner;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "request_id")
     private ItemRequest request;
 
 }
