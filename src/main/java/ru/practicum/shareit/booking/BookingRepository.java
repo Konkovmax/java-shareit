@@ -1,13 +1,12 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.booking;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
 
 import java.util.List;
 
-public interface ItemRepository extends JpaRepository<Item, Integer>{
+public interface BookingRepository extends JpaRepository<Item, Integer>{
 
     @Query(" select i from Item i " +
             "where (upper(i.name) like upper(concat('%', ?1, '%')) " +
