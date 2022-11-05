@@ -1,11 +1,10 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.UserDto;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingIncomeDto;
 
 import javax.validation.Valid;
-import java.util.List;
 
 /**
  * TODO Sprint add-bookings.
@@ -13,35 +12,32 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/bookings")
 public class BookingController {
-    private final BookingService bookingService;
+    private final BookingServiceImpl bookingService;
 
-    public UserController(UserService userService) {
-        this.bookingService = userService;
+    public BookingController(BookingServiceImpl bookingService) {
+        this.bookingService = bookingService;
     }
 
     @PostMapping
-    public UserDto create(@Valid @RequestBody UserDto user) {
-        return bookingService.create(user);
+    public BookingDto create(@Valid @RequestBody BookingIncomeDto booking, @RequestHeader(value = "X-Sharer-User-Id",
+            required = true) int userId) {
+        return bookingService.create(booking, userId);
     }
 
-    @GetMapping
-    public List<UserDto> getAll() {
-        return bookingService.getAll();
+    @PatchMapping("/{bookingId}")
+    public BookingDto update(@PathVariable int bookingId,
+                             @RequestHeader(value = "X-Sharer-User-Id", required = true) int userId,
+                             @RequestParam(value = "approved", required = true) Boolean approved) {
+        return bookingService.update(bookingId, userId, approved);
     }
 
-    @GetMapping("/{id}")
-    public UserDto get(@PathVariable("id") Integer userId) {
-        return bookingService.getUser(userId);
-    }
-
-    @PatchMapping("/{id}")
-    public UserDto update(@PathVariable int id, //@Valid
-                          @RequestBody UserDto user) {
-        return bookingService.update(id, user);
-    }
-
-    @DeleteMapping(value = "/{id}")
-    public void delete(@PathVariable("id") Integer userId) {
-        bookingService.delete(userId);
-    }
+//    @GetMapping
+//    public List<BookingDto> getAll() {
+//        return bookingService.getAll();
+//    }
+//
+//    @GetMapping("/{id}")
+//    public BookingDto get(@PathVariable("id") Integer bookingId) {
+//        return bookingService.getBooking(bookingId);
+//    }
 }
