@@ -43,6 +43,14 @@ public class ErrorHandlingControllerAdvice {
                 .body(new ErrorMessage(exception.getMessage()));
     }
 
+    @ExceptionHandler(UnsupportedStatusException.class)
+    public ResponseEntity<ErrorMessage> handleException(UnsupportedStatusException exception) {
+        log.info("400 Bad Request Error", exception.getMessage(), exception);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorMessage(exception.getMessage()));
+    }
+
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ErrorMessage> handleException(ConflictException exception) {
         log.info("409 Conflict Error", exception.getMessage(), exception);

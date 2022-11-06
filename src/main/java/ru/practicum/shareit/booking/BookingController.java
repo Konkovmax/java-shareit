@@ -5,6 +5,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingIncomeDto;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * TODO Sprint add-bookings.
@@ -27,17 +28,25 @@ public class BookingController {
     @PatchMapping("/{bookingId}")
     public BookingDto update(@PathVariable int bookingId,
                              @RequestHeader(value = "X-Sharer-User-Id", required = true) int userId,
-                             @RequestParam(value = "approved", required = true) Boolean approved) {
+                             @RequestParam(value = "approved", required = true) boolean approved) {
         return bookingService.update(bookingId, userId, approved);
     }
 
-//    @GetMapping
-//    public List<BookingDto> getAll() {
-//        return bookingService.getAll();
-//    }
-//
-//    @GetMapping("/{id}")
-//    public BookingDto get(@PathVariable("id") Integer bookingId) {
-//        return bookingService.getBooking(bookingId);
-//    }
+    @GetMapping
+    public List<BookingDto> getAll(@RequestHeader(value = "X-Sharer-User-Id", required = true) int userId,
+                                   @RequestParam(value = "state", defaultValue = "ALL", required = false) String state){
+        return bookingService.getAll(userId, state, false);
+    }
+
+    @GetMapping("/owner")
+    public List<BookingDto> getAllOwners(@RequestHeader(value = "X-Sharer-User-Id", required = true) int userId,
+                                   @RequestParam(value = "state", defaultValue = "ALL", required = false) String state){
+        return bookingService.getAll(userId, state, true);
+    }
+
+    @GetMapping("/{bookingId}")
+    public BookingDto get(@PathVariable("bookingId") Integer bookingId,
+                          @RequestHeader(value = "X-Sharer-User-Id") int userId) {
+        return bookingService.getBooking(bookingId, userId);
+    }
 }

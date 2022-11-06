@@ -69,12 +69,6 @@ public class ItemServiceImpl implements ItemService {
                     "User with id: %s does not own this item",
                     userId));
         }
-//        if (!itemRepository.items.containsKey(id)) {
-//            log.warn("item not found");
-//            throw new NotFoundException(String.format(
-//                    "Item with id: %s not found",
-//                    id));
-//        }
         Item updateItem = itemRepository.findById(id).get();
 
         if (item.getName() != null) {
@@ -92,13 +86,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public void delete(int itemId) {
-//        if (itemRepository.items.containsKey(itemId)) {
-//            log.warn("item not found");
-//            throw new NotFoundException(String.format(
-//                    "Item with id: %s not found",
-//                    itemId));
-//        }
-        itemRepository.deleteById(itemId);
+       itemRepository.deleteById(itemId);
     }
 
     public ItemDto getItem(int itemId) {

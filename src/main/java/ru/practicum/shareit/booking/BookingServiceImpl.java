@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -52,6 +53,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setBooker(userRepository.findById(userId).get());
         booking.setStatus(Status.WAITING);
         booking.setItem(itemRepository.findById(itemId).get());
+        log.warn("Booking created");
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
@@ -70,78 +72,76 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-//    public List<BookingDto> getAll(int userId) {
-//        return bookingRepository.findAll().stream()
-//                .filter(x -> x.getOwner().getId() == userId)
-//                .map(object -> BookingMapper.toBookingDto(object))
-//                .collect(Collectors.toList());
-//    }
-//
-//    public List<BookingDto> search(String query) {
-//        if (query.isEmpty()) {
-//            return new ArrayList<>();
-//        } else {
-//            String adaptedQuery = query.toLowerCase();
-//            return bookingRepository.search(adaptedQuery).stream()
-//                    .map(object -> BookingMapper.toBookingDto(object))
-//                    .collect(Collectors.toList());
-//        }
-//    }
-//
-//    public BookingDto update(int id, BookingDto booking, int userId) {
-////        if (!userStorage.users.containsKey(userId)) {
-////            log.warn("user not found");
-////            throw new NotFoundException(String.format(
-////                    "User with id: %s not found",
-////                    userId));
-////        }
-//        if (//bookingRepository.findById(id).isEmpty()
-//        //        ||
-//        bookingRepository.findById(id).get().getOwner().getId() != userId
-//        ) {
-//            log.warn("user mismatched");
-//            throw new NotFoundException(String.format(
-//                    "User with id: %s does not own this booking",
-//                    userId));
-//        }
-////        if (!bookingRepository.bookings.containsKey(id)) {
-////            log.warn("booking not found");
-////            throw new NotFoundException(String.format(
-////                    "Booking with id: %s not found",
-////                    id));
-////        }
-//        Booking updateBooking = bookingRepository.findById(id).get();
-//
-//        if (booking.getName() != null) {
-//            updateBooking.setName(booking.getName());
-//        }
-//        if (booking.getDescription() != null) {
-//            updateBooking.setDescription(booking.getDescription());
-//        }
-//        if (booking.getAvailable() != null) {
-//            updateBooking.setAvailable(booking.getAvailable());
-//        }
-//        log.info("Booking updated");
-//
-//        return BookingMapper.toBookingDto(bookingRepository.save(updateBooking));
-//    }
-//
-//    public void delete(int bookingId) {
-////        if (bookingRepository.bookings.containsKey(bookingId)) {
-////            log.warn("booking not found");
-////            throw new NotFoundException(String.format(
-////                    "Booking with id: %s not found",
-////                    bookingId));
-////        }
-//        bookingRepository.deleteById(bookingId);
-//    }
-//
-//    public BookingDto getBooking(int bookingId) {
-//        if (bookingRepository.findById(bookingId).isEmpty()) {
-//            log.warn("booking not found");
-//            throw new NotFoundException(String.format(
-//                    "Booking with id: %s not found", bookingId));
-//        }
-//        return BookingMapper.toBookingDto(bookingRepository.findById(bookingId).get());
-//    }
+    public List<BookingDto> getAll(int userId, String stateIncome, boolean isOwner) {
+        if (userRepository.findById(userId).isEmpty()) {
+            log.warn("user not found");
+            throw new NotFoundException(String.format(
+                    "User with id: %s not found", userId));
+        }
+        State state;
+        try {
+        state = State.valueOf(stateIncome);
+                    } catch (IllegalArgumentException e){
+            throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
+                    //UnsupportedOperationException("Unknown state: UNSUPPORTED_STATUS");
+        }
+        Predicate<Booking> userType;
+        if(isOwner) {
+            userType = x -> x.getItem().getOwner().getId() == userId;
+        }else{
+            userType = x -> x.getBooker().getId() == userId;
+        }
+        if (state == State.FUTURE) {
+            return bookingRepository.findAll().stream()
+                    .filter(userType)
+//                    .filter(x -> x.getBooker().getId() == userId)
+                   // .filter(x -> x.getStatus() == Status.APPROVED)
+                    .filter(x -> x.getStart().isAfter(LocalDateTime.now()))
+                    .map(object -> BookingMapper.toBookingDto(object))
+                    .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
+                    .collect(Collectors.toList());
+        } else {
+            return bookingRepository.findAll().stream()
+                    .filter(userType)
+                    .map(object -> BookingMapper.toBookingDto(object))
+                    .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
+                    .collect(Collectors.toList());
+        }
+    }
+
+    public BookingDto update(int bookingId, int userId, boolean approved) {
+        if (bookingRepository.findById(bookingId).get().getItem().getOwner().getId() != userId
+        ) {
+            log.warn("user mismatched");
+            throw new NotFoundException(String.format(
+                    "User with id: %s does not own this item",
+                    userId));
+        }
+        Booking updateBooking = bookingRepository.findById(bookingId).get();
+        if(approved){
+            updateBooking.setStatus(Status.APPROVED);
+        }else {
+            updateBooking.setStatus(Status.REJECTED);
+        }
+        log.info("Booking updated");
+        return BookingMapper.toBookingDto(bookingRepository.save(updateBooking));
+    }
+
+    public BookingDto getBooking(int bookingId, int userId) {
+        if (bookingRepository.findById(bookingId).isEmpty()) {
+            log.warn("booking not found");
+            throw new NotFoundException(String.format(
+                    "Booking with id: %s not found", bookingId));
+        }
+        if ((bookingRepository.findById(bookingId).get().getBooker().getId() != userId)&&
+                (bookingRepository.findById(bookingId).get().getItem().getOwner().getId()!= userId)
+        ) {
+            log.warn("user mismatched");
+            throw new NotFoundException(String.format(
+                    "User with id: %s does not booked this item",
+                    userId));
+        }
+
+        return BookingMapper.toBookingDto(bookingRepository.findById(bookingId).get());
+    }
 }
