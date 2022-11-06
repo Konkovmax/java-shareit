@@ -49,6 +49,12 @@ public class BookingServiceImpl implements BookingService {
                     "Item with id: %s is not available",
                     bookingIncome.getItemId()));
         }
+        if (itemRepository.findById(itemId).get().getOwner().getId() == userId) {
+            log.warn("user mismatched");
+            throw new NotFoundException(String.format(
+                    "User with id: %s does already own this item",
+                    userId));
+        }
         Booking booking = BookingMapper.IncomeToBooking(bookingIncome);
         booking.setBooker(userRepository.findById(userId).get());
         booking.setStatus(Status.WAITING);
@@ -110,12 +116,15 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public BookingDto update(int bookingId, int userId, boolean approved) {
-        if (bookingRepository.findById(bookingId).get().getItem().getOwner().getId() != userId
-        ) {
+        if (bookingRepository.findById(bookingId).get().getItem().getOwner().getId() != userId) {
             log.warn("user mismatched");
             throw new NotFoundException(String.format(
                     "User with id: %s does not own this item",
                     userId));
+        }
+        if (bookingRepository.findById(bookingId).get().getStatus() == Status.APPROVED) {
+            log.warn("Booking already approved");
+            throw new BadRequestException(String.format("Booking with id: %s already approved", bookingId));
         }
         Booking updateBooking = bookingRepository.findById(bookingId).get();
         if(approved){
