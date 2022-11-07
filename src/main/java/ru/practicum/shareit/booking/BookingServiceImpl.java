@@ -83,7 +83,6 @@ public class BookingServiceImpl implements BookingService {
             state = State.valueOf(stateIncome);
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
-            //UnsupportedOperationException("Unknown state: UNSUPPORTED_STATUS");
         }
         Predicate<Booking> userType;
         if (isOwner) {
@@ -95,6 +94,16 @@ public class BookingServiceImpl implements BookingService {
         switch (state) {
             case FUTURE: {
                 bookingStatus = x -> x.getStart().isAfter(LocalDateTime.now());
+                break;
+            }
+            case CURRENT: {
+                bookingStatus = x -> x.getStart().isBefore(LocalDateTime.now())
+                &&x.getEnd().isAfter(LocalDateTime.now());
+                break;
+            }
+            case PAST: {
+                bookingStatus = x -> x.getEnd().isBefore(LocalDateTime.now())
+                &&(x.getStatus() == Status.APPROVED);
                 break;
             }
             case WAITING: {
