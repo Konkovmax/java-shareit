@@ -32,24 +32,18 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public ItemDto create(ItemDto item, int userId) {
-//        if (!userStorage.users.containsKey(userId)) {
-//            log.warn("user not found");
-//            throw new NotFoundException(String.format(
-//                    "User with id: %s not found",
-//                    userId));
-//        }
         item.setOwner(userRepository.findById(userId).get());
         return ItemMapper.toItemDto(itemRepository.save(ItemMapper.toItem(item)));
     }
 
-    public Comment createComment(int itemId, String text, int userId){
-
+    public Comment createComment(int itemId, String text, int userId) {
+        Comment newComment = new Comment();
     }
 
     public List<ItemDto> getAll(int userId) {
-        Function<ItemDto,ItemDto> addBooking = i -> {
+        Function<ItemDto, ItemDto> addBooking = i -> {
 
-           // ItemDto itemWithBooking = ItemMapper.toItemDto(itemRepository.findById(itemId).get());
+            // ItemDto itemWithBooking = ItemMapper.toItemDto(itemRepository.findById(itemId).get());
             List<BookingDateDto> bookings =
                     bookingRepository.getBookingsByItem_IdOrderByStart(i.getId()).stream()
                             .filter(x -> x.getItem().getOwner().getId() == userId)
@@ -61,10 +55,10 @@ public class ItemServiceImpl implements ItemService {
             }
             return i;
         };
-             return itemRepository.findAll().stream()
+        return itemRepository.findAll().stream()
                 .filter(x -> x.getOwner().getId() == userId)
                 .map(object -> ItemMapper.toItemDto(object))
-                     .map(addBooking)
+                .map(addBooking)
                 .collect(Collectors.toList());
     }
 
@@ -102,7 +96,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public void delete(int itemId) {
-       itemRepository.deleteById(itemId);
+        itemRepository.deleteById(itemId);
     }
 
     public ItemDto getItem(int itemId, int userId) {
@@ -117,7 +111,7 @@ public class ItemServiceImpl implements ItemService {
                         .filter(x -> x.getItem().getOwner().getId() == userId)
                         .map(object -> BookingMapper.toBookingDateDto(object))
                         .collect(Collectors.toList());
-        if(!bookings.isEmpty()) {
+        if (!bookings.isEmpty()) {
             itemWithBooking.setLastBooking(bookings.get(0));
             itemWithBooking.setNextBooking(bookings.get(bookings.size() - 1));
         }
