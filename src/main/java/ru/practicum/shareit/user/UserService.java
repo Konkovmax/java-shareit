@@ -20,8 +20,8 @@ public class UserService {
 
     public UserDto create(UserDto user) {
         try {
-        return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(user)));
-            } catch (DataIntegrityViolationException e){
+            return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(user)));
+        } catch (DataIntegrityViolationException e) {
             log.error("Duplicated Email");
             throw new ConflictException("Email can't duplicated");
         }
@@ -29,22 +29,22 @@ public class UserService {
 
     public List<UserDto> getAll() {
         return userRepository.findAll().stream()
-                .map(object -> UserMapper.toUserDto(object))
+                .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
     public UserDto update(int id, UserDto user) {
         user.setId(id);
         User updateUser = userRepository.findById(id).get();
-            if (user.getName() != null) {
-                updateUser.setName(user.getName());
-            }
-            if (user.getEmail() != null) {
-                updateUser.setEmail(user.getEmail());
-            }
+        if (user.getName() != null) {
+            updateUser.setName(user.getName());
+        }
+        if (user.getEmail() != null) {
+            updateUser.setEmail(user.getEmail());
+        }
         try {
-        return UserMapper.toUserDto(userRepository.save(updateUser));
-        } catch (DataIntegrityViolationException e){
+            return UserMapper.toUserDto(userRepository.save(updateUser));
+        } catch (DataIntegrityViolationException e) {
             log.error("Duplicated Email");
             throw new ConflictException("Email can't duplicated");
         }

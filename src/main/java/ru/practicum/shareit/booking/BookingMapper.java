@@ -15,6 +15,7 @@ public class BookingMapper {
                 booking.getStatus()
         );
     }
+
     public static BookingDateDto toBookingDateDto(Booking booking) {
         return new BookingDateDto(
                 booking.getId(),
@@ -39,12 +40,8 @@ public class BookingMapper {
 
     public static Booking IncomeToBooking(BookingIncomeDto booking) {
         Booking newBooking = new Booking();
-                newBooking.setStart(booking.getStart());
-                newBooking.setEnd(booking.getEnd());
-//                booking.getItem()
-//                booking.getBooker(),
-//                booking.getStatus()
+        newBooking.setStart(booking.getStart());
+        newBooking.setEnd(booking.getEnd());
         return newBooking;
-//        );
     }
 }

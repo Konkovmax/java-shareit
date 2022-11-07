@@ -7,9 +7,6 @@ import ru.practicum.shareit.booking.dto.BookingIncomeDto;
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-bookings.
- */
 @RestController
 @RequestMapping(path = "/bookings")
 public class BookingController {
@@ -20,27 +17,27 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingDto create(@Valid @RequestBody BookingIncomeDto booking, @RequestHeader(value = "X-Sharer-User-Id",
-            required = true) int userId) {
+    public BookingDto create(@Valid @RequestBody BookingIncomeDto booking,
+                             @RequestHeader(value = "X-Sharer-User-Id") int userId) {
         return bookingService.create(booking, userId);
     }
 
     @PatchMapping("/{bookingId}")
     public BookingDto update(@PathVariable int bookingId,
-                             @RequestHeader(value = "X-Sharer-User-Id", required = true) int userId,
-                             @RequestParam(value = "approved", required = true) boolean approved) {
+                             @RequestHeader(value = "X-Sharer-User-Id") int userId,
+                             @RequestParam(value = "approved") boolean approved) {
         return bookingService.update(bookingId, userId, approved);
     }
 
     @GetMapping
-    public List<BookingDto> getAll(@RequestHeader(value = "X-Sharer-User-Id", required = true) int userId,
-                                   @RequestParam(value = "state", defaultValue = "ALL", required = false) String state){
+    public List<BookingDto> getAll(@RequestHeader(value = "X-Sharer-User-Id") int userId,
+                                   @RequestParam(value = "state", defaultValue = "ALL", required = false) String state) {
         return bookingService.getAll(userId, state, false);
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getAllOwners(@RequestHeader(value = "X-Sharer-User-Id", required = true) int userId,
-                                   @RequestParam(value = "state", defaultValue = "ALL", required = false) String state){
+    public List<BookingDto> getAllOwners(@RequestHeader(value = "X-Sharer-User-Id") int userId,
+                                         @RequestParam(value = "state", defaultValue = "ALL", required = false) String state) {
         return bookingService.getAll(userId, state, true);
     }
 

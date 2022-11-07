@@ -31,6 +31,7 @@ public class ItemMapper {
                 item.getRequest() != null ? item.getRequest() : null
         );
     }
+
     public static CommentDto toCommentDto(Comment comment) {
         return new CommentDto(
                 comment.getId(),

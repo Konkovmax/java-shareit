@@ -2,7 +2,6 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
@@ -43,23 +42,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public CommentDto createComment(int itemId, CommentDto commentDto, int userId) {
-
-        List<Booking> test = bookingRepository.getBookingsByItem_IdOrderByStart(itemId);
         if (bookingRepository.getBookingsByItem_IdOrderByStart(itemId).stream()
                 .filter(x -> x.getBooker().getId() == userId)
                 .filter(x -> x.getStatus() == Status.APPROVED)
-                .filter(x -> x.getEnd().isBefore(LocalDateTime.now()))
-                .collect(Collectors.toList()).isEmpty()) {
+                .filter(x -> x.getEnd().isBefore(LocalDateTime.now())).count() == 0) {
             log.warn("user does not booked this item");
             throw new BadRequestException(String.format(
                     "User with id: %s does not booked this item",
                     userId));
         }
         Comment newComment = new Comment();
-                newComment.setText(commentDto.getText());
-                newComment.setItem(itemRepository.findById(itemId).get());
-                newComment.setAuthor(userRepository.findById(userId).get());
-                newComment.setCreated(LocalDateTime.now());
+        newComment.setText(commentDto.getText());
+        newComment.setItem(itemRepository.findById(itemId).get());
+        newComment.setAuthor(userRepository.findById(userId).get());
+        newComment.setCreated(LocalDateTime.now());
         return ItemMapper.toCommentDto(commentRepository.save(newComment));
     }
 
@@ -68,7 +64,7 @@ public class ItemServiceImpl implements ItemService {
             List<BookingDateDto> bookings =
                     bookingRepository.getBookingsByItem_IdOrderByStart(i.getId()).stream()
                             .filter(x -> x.getItem().getOwner().getId() == userId)
-                            .map(object -> BookingMapper.toBookingDateDto(object))
+                            .map(BookingMapper::toBookingDateDto)
                             .collect(Collectors.toList());
             if (!bookings.isEmpty()) {
                 i.setLastBooking(bookings.get(0));
@@ -78,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
         };
         return itemRepository.findAll().stream()
                 .filter(x -> x.getOwner().getId() == userId)
-                .map(object -> ItemMapper.toItemDto(object))
+                .map(ItemMapper::toItemDto)
                 .map(addBooking)
                 .collect(Collectors.toList());
     }
@@ -89,7 +85,7 @@ public class ItemServiceImpl implements ItemService {
         } else {
             String adaptedQuery = query.toLowerCase();
             return itemRepository.search(adaptedQuery).stream()
-                    .map(object -> ItemMapper.toItemDto(object))
+                    .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
         }
     }
@@ -130,14 +126,14 @@ public class ItemServiceImpl implements ItemService {
         List<BookingDateDto> bookings =
                 bookingRepository.getBookingsByItem_IdOrderByStart(itemId).stream()
                         .filter(x -> x.getItem().getOwner().getId() == userId)
-                        .map(object -> BookingMapper.toBookingDateDto(object))
+                        .map(BookingMapper::toBookingDateDto)
                         .collect(Collectors.toList());
         if (!bookings.isEmpty()) {
             itemWithBooking.setLastBooking(bookings.get(0));
             itemWithBooking.setNextBooking(bookings.get(bookings.size() - 1));
         }
         itemWithBooking.setComments(commentRepository.getCommentsByItem_Id(itemId).stream()
-                .map(object -> ItemMapper.toCommentDto(object))
+                .map(ItemMapper::toCommentDto)
                 .collect(Collectors.toList()));
         return itemWithBooking;
     }
