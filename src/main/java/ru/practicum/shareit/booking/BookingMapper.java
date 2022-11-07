@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import ru.practicum.shareit.booking.dto.BookingDateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingIncomeDto;
 
@@ -11,6 +12,16 @@ public class BookingMapper {
                 booking.getEnd(),
                 booking.getItem(),
                 booking.getBooker(),
+                booking.getStatus()
+        );
+    }
+    public static BookingDateDto toBookingDateDto(Booking booking) {
+        return new BookingDateDto(
+                booking.getId(),
+                booking.getStart(),
+                booking.getEnd(),
+                booking.getItem(),
+                booking.getBooker().getId(),
                 booking.getStatus()
         );
     }

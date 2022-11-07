@@ -21,6 +21,13 @@ public class ItemController {
         return itemService.create(item, userId);
     }
 
+    @PostMapping("{itemId}/comment")
+    public ItemDto createComment(@PathVariable("itemId") Integer itemId,
+                                 @RequestBody String text,
+                                 @RequestHeader(value = "X-Sharer-User-Id", required = true) int userId) {
+        return itemService.createComment(itemId, text, userId);
+    }
+
     @GetMapping
     public List<ItemDto> getAll(@RequestHeader(value = "X-Sharer-User-Id", required = true) int userId) {
         return itemService.getAll(userId);
@@ -32,8 +39,9 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    public ItemDto get(@PathVariable("id") Integer itemId) {
-        return itemService.getItem(itemId);
+    public ItemDto get(@PathVariable("id") Integer itemId,
+                       @RequestHeader(value = "X-Sharer-User-Id", required = true) int userId) {
+        return itemService.getItem(itemId, userId);
     }
 
     @PatchMapping("/{id}")

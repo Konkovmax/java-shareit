@@ -6,16 +6,10 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingIncomeDto;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.ItemService;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -86,71 +80,80 @@ public class BookingServiceImpl implements BookingService {
         }
         State state;
         try {
-        state = State.valueOf(stateIncome);
-                    } catch (IllegalArgumentException e){
+            state = State.valueOf(stateIncome);
+        } catch (IllegalArgumentException e) {
             throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
-                    //UnsupportedOperationException("Unknown state: UNSUPPORTED_STATUS");
+            //UnsupportedOperationException("Unknown state: UNSUPPORTED_STATUS");
         }
         Predicate<Booking> userType;
-        if(isOwner) {
+        if (isOwner) {
             userType = x -> x.getItem().getOwner().getId() == userId;
-        }else{
+        } else {
             userType = x -> x.getBooker().getId() == userId;
         }
-        if (state == State.FUTURE) {
+        Predicate<Booking> bookingStatus;
+        switch (state) {
+            case FUTURE: {
+                bookingStatus = x -> x.getStart().isAfter(LocalDateTime.now());
+                break;
+            }
+            case WAITING: {
+                bookingStatus = x -> x.getStatus() == Status.WAITING;
+                break;
+            }
+            case REJECTED: {
+                bookingStatus = x -> x.getStatus() == Status.REJECTED;
+                break;
+            }
+            default: {
+                bookingStatus = x -> true;
+                break;
+            }
+        }
             return bookingRepository.findAll().stream()
                     .filter(userType)
-//                    .filter(x -> x.getBooker().getId() == userId)
-                   // .filter(x -> x.getStatus() == Status.APPROVED)
-                    .filter(x -> x.getStart().isAfter(LocalDateTime.now()))
+                    .filter(bookingStatus)
                     .map(object -> BookingMapper.toBookingDto(object))
                     .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
                     .collect(Collectors.toList());
-        } else {
-            return bookingRepository.findAll().stream()
-                    .filter(userType)
-                    .map(object -> BookingMapper.toBookingDto(object))
-                    .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
-                    .collect(Collectors.toList());
-        }
-    }
-
-    public BookingDto update(int bookingId, int userId, boolean approved) {
-        if (bookingRepository.findById(bookingId).get().getItem().getOwner().getId() != userId) {
-            log.warn("user mismatched");
-            throw new NotFoundException(String.format(
-                    "User with id: %s does not own this item",
-                    userId));
-        }
-        if (bookingRepository.findById(bookingId).get().getStatus() == Status.APPROVED) {
-            log.warn("Booking already approved");
-            throw new BadRequestException(String.format("Booking with id: %s already approved", bookingId));
-        }
-        Booking updateBooking = bookingRepository.findById(bookingId).get();
-        if(approved){
-            updateBooking.setStatus(Status.APPROVED);
-        }else {
-            updateBooking.setStatus(Status.REJECTED);
-        }
-        log.info("Booking updated");
-        return BookingMapper.toBookingDto(bookingRepository.save(updateBooking));
-    }
-
-    public BookingDto getBooking(int bookingId, int userId) {
-        if (bookingRepository.findById(bookingId).isEmpty()) {
-            log.warn("booking not found");
-            throw new NotFoundException(String.format(
-                    "Booking with id: %s not found", bookingId));
-        }
-        if ((bookingRepository.findById(bookingId).get().getBooker().getId() != userId)&&
-                (bookingRepository.findById(bookingId).get().getItem().getOwner().getId()!= userId)
-        ) {
-            log.warn("user mismatched");
-            throw new NotFoundException(String.format(
-                    "User with id: %s does not booked this item",
-                    userId));
         }
 
-        return BookingMapper.toBookingDto(bookingRepository.findById(bookingId).get());
+        public BookingDto update ( int bookingId, int userId, boolean approved){
+            if (bookingRepository.findById(bookingId).get().getItem().getOwner().getId() != userId) {
+                log.warn("user mismatched");
+                throw new NotFoundException(String.format(
+                        "User with id: %s does not own this item",
+                        userId));
+            }
+            if (bookingRepository.findById(bookingId).get().getStatus() == Status.APPROVED) {
+                log.warn("Booking already approved");
+                throw new BadRequestException(String.format("Booking with id: %s already approved", bookingId));
+            }
+            Booking updateBooking = bookingRepository.findById(bookingId).get();
+            if (approved) {
+                updateBooking.setStatus(Status.APPROVED);
+            } else {
+                updateBooking.setStatus(Status.REJECTED);
+            }
+            log.info("Booking updated");
+            return BookingMapper.toBookingDto(bookingRepository.save(updateBooking));
+        }
+
+        public BookingDto getBooking ( int bookingId, int userId){
+            if (bookingRepository.findById(bookingId).isEmpty()) {
+                log.warn("booking not found");
+                throw new NotFoundException(String.format(
+                        "Booking with id: %s not found", bookingId));
+            }
+            if ((bookingRepository.findById(bookingId).get().getBooker().getId() != userId) &&
+                    (bookingRepository.findById(bookingId).get().getItem().getOwner().getId() != userId)
+            ) {
+                log.warn("user mismatched");
+                throw new NotFoundException(String.format(
+                        "User with id: %s does not booked this item",
+                        userId));
+            }
+
+            return BookingMapper.toBookingDto(bookingRepository.findById(bookingId).get());
+        }
     }
-}
