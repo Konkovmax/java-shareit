@@ -59,12 +59,12 @@ public class ErrorHandlingControllerAdvice {
                 .body(new ErrorMessage(exception.getMessage()));
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(Throwable.class)
-    @ResponseBody
-    public ErrorResponse handleThrowable(final Throwable ex) {
-        log.error(" 500 Unexpected Error", ex.getMessage(), ex);
-        return new ErrorResponse("INTERNAL_SERVER_ERROR", "An unexpected internal server error occurred");
-    }
+//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//    @ExceptionHandler(Throwable.class)
+//    @ResponseBody
+//    public ErrorResponse handleThrowable(final Throwable ex) {
+//        log.error(" 500 Unexpected Error", ex.getMessage(), ex);
+//        return new ErrorResponse("INTERNAL_SERVER_ERROR", "An unexpected internal server error occurred");
+//    }
 
 }
