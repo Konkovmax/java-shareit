@@ -48,7 +48,7 @@ public class BookingServiceImpl implements BookingService {
                     "User with id: %s does already own this item",
                     userId));
         }
-        Booking booking = BookingMapper.IncomeToBooking(bookingIncome);
+        Booking booking = BookingMapper.incomeToBooking(bookingIncome);
         booking.setBooker(userRepository.findById(userId).get());
         booking.setStatus(Status.WAITING);
         booking.setItem(itemRepository.findById(itemId).get());

@@ -38,7 +38,7 @@ public class BookingMapper {
         );
     }
 
-    public static Booking IncomeToBooking(BookingIncomeDto booking) {
+    public static Booking incomeToBooking(BookingIncomeDto booking) {
         Booking newBooking = new Booking();
         newBooking.setStart(booking.getStart());
         newBooking.setEnd(booking.getEnd());
