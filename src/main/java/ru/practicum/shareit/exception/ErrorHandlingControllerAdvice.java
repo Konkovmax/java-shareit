@@ -4,16 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@ControllerAdvice
+@RestControllerAdvice
+
+//@Slf4j
+//@ControllerAdvice
 public class ErrorHandlingControllerAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -59,12 +59,12 @@ public class ErrorHandlingControllerAdvice {
                 .body(new ErrorMessage(exception.getMessage()));
     }
 
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    @ExceptionHandler(Throwable.class)
-//    @ResponseBody
-//    public ErrorResponse handleThrowable(final Throwable ex) {
-//        log.error(" 500 Unexpected Error", ex.getMessage(), ex);
-//        return new ErrorResponse("INTERNAL_SERVER_ERROR", "An unexpected internal server error occurred");
-//    }
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Throwable.class)
+    @ResponseBody
+    public ErrorResponse handleThrowable(final Throwable ex) {
+        log.error(" 500 Unexpected Error", ex.getMessage(), ex);
+        return new ErrorResponse("INTERNAL_SERVER_ERROR", "An unexpected internal server error occurred");
+    }
 
 }
