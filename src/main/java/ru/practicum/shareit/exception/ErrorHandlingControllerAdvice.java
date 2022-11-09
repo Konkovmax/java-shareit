@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 
-//@Slf4j
-//@ControllerAdvice
 public class ErrorHandlingControllerAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
