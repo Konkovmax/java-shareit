@@ -35,7 +35,7 @@ public class UserService {
 
     public UserDto update(int id, UserDto user) {
         user.setId(id);
-        User updateUser = userRepository.findById(id).get();
+        User updateUser = userRepository.findById(id).orElseThrow();
         if (user.getName() != null) {
             updateUser.setName(user.getName());
         }
@@ -55,12 +55,9 @@ public class UserService {
     }
 
     public UserDto getUser(int userId) {
-        if (userRepository.findById(userId).isEmpty()) {
-            log.warn("user not found");
-            throw new NotFoundException(String.format(
-                    "User with id: %s not found", userId));
-        }
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format(
+                "User with id: %s not found", userId)));
         log.info("User found");
-        return UserMapper.toUserDto(userRepository.findById(userId).get());
+        return UserMapper.toUserDto(userRepository.findById(userId).orElseThrow());
     }
 }

@@ -9,7 +9,9 @@ public interface BookingService {
 
     BookingDto create(BookingIncomeDto booking, int userId);
 
-    List<BookingDto> getAll(int userId, String stateIncome, boolean isOwner);
+    List<BookingDto> getAllForUser(int userId, String stateIncome);
+
+    List<BookingDto> getAllForOwner(int userId, String stateIncome);
 
     BookingDto update(int bookingId, int userId, boolean approved);
 

@@ -31,29 +31,83 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto create(BookingIncomeDto bookingIncome, int userId) {
         throwIfNotValid(bookingIncome);
         int itemId = bookingIncome.getItemId();
-        if (itemRepository.findById(itemId).isEmpty()) {
-            log.warn("item not found");
-            throw new NotFoundException(String.format(
-                    "Item with id: %s not found", itemId));
-        }
-        if (!itemRepository.findById(itemId).get().getAvailable()) {
+        itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(String.format(
+                "Item with id: %s not found", itemId)));
+        if (!itemRepository.findById(itemId).orElseThrow().getAvailable()) {
             log.warn("Item is not available");
             throw new BadRequestException(String.format(
                     "Item with id: %s is not available",
                     bookingIncome.getItemId()));
         }
-        if (itemRepository.findById(itemId).get().getOwner().getId() == userId) {
+        if (itemRepository.findById(itemId).orElseThrow().getOwner().getId() == userId) {
             log.warn("user mismatched");
             throw new NotFoundException(String.format(
                     "User with id: %s does already own this item",
                     userId));
         }
         Booking booking = BookingMapper.incomeToBooking(bookingIncome);
-        booking.setBooker(userRepository.findById(userId).get());
+        booking.setBooker(userRepository.findById(userId).orElseThrow());
         booking.setStatus(Status.WAITING);
-        booking.setItem(itemRepository.findById(itemId).get());
+        booking.setItem(itemRepository.findById(itemId).orElseThrow());
         log.warn("Booking created");
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
+    }
+
+    public List<BookingDto> getAllForUser(int userId, String stateIncome) {
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format(
+                "User with id: %s not found", userId)));
+        //как сюда ещё логирование ввернуть - что-то не нашёл... или это как-то подругому делается?
+        //log.warn("user not found");
+        return bookingRepository.getBookingByBooker_Id(userId).stream()
+                .filter(bookingStatus(stateIncome))
+                .map(BookingMapper::toBookingDto)
+                .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
+                .collect(Collectors.toList());
+    }
+
+    public List<BookingDto> getAllForOwner(int userId, String stateIncome) {
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format(
+                "User with id: %s not found", userId)));
+        return bookingRepository.getBookingByOwner_Id(userId).stream()
+                .filter(bookingStatus(stateIncome))
+                .map(BookingMapper::toBookingDto)
+                .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
+                .collect(Collectors.toList());
+    }
+
+    public BookingDto update(int bookingId, int userId, boolean approved) {
+        if (bookingRepository.findById(bookingId).orElseThrow().getItem().getOwner().getId() != userId) {
+            log.warn("user mismatched");
+            throw new NotFoundException(String.format(
+                    "User with id: %s does not own this item",
+                    userId));
+        }
+        if (bookingRepository.findById(bookingId).orElseThrow().getStatus() == Status.APPROVED) {
+            log.warn("Booking already approved");
+            throw new BadRequestException(String.format("Booking with id: %s already approved", bookingId));
+        }
+        Booking updateBooking = bookingRepository.findById(bookingId).orElseThrow();
+        if (approved) {
+            updateBooking.setStatus(Status.APPROVED);
+        } else {
+            updateBooking.setStatus(Status.REJECTED);
+        }
+        log.info("Booking updated");
+        return BookingMapper.toBookingDto(bookingRepository.save(updateBooking));
+    }
+
+    public BookingDto getBooking(int bookingId, int userId) {
+        bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException(String.format(
+                "Booking with id: %s not found", bookingId)));
+        if ((bookingRepository.findById(bookingId).orElseThrow().getBooker().getId() != userId) &&
+                (bookingRepository.findById(bookingId).orElseThrow().getItem().getOwner().getId() != userId)
+        ) {
+            log.warn("user mismatched");
+            throw new NotFoundException(String.format(
+                    "User with id: %s does not booked this item",
+                    userId));
+        }
+        return BookingMapper.toBookingDto(bookingRepository.findById(bookingId).orElseThrow());
     }
 
     private void throwIfNotValid(BookingIncomeDto booking) throws BadRequestException {
@@ -71,23 +125,12 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    public List<BookingDto> getAll(int userId, String stateIncome, boolean isOwner) {
-        if (userRepository.findById(userId).isEmpty()) {
-            log.warn("user not found");
-            throw new NotFoundException(String.format(
-                    "User with id: %s not found", userId));
-        }
+    private Predicate<Booking> bookingStatus(String stateIncome) {
         State state;
         try {
             state = State.valueOf(stateIncome);
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
-        }
-        Predicate<Booking> userType;
-        if (isOwner) {
-            userType = x -> x.getItem().getOwner().getId() == userId;
-        } else {
-            userType = x -> x.getBooker().getId() == userId;
         }
         Predicate<Booking> bookingStatus;
         switch (state) {
@@ -118,49 +161,6 @@ public class BookingServiceImpl implements BookingService {
                 break;
             }
         }
-        return bookingRepository.findAll().stream()
-                .filter(userType)
-                .filter(bookingStatus)
-                .map(BookingMapper::toBookingDto)
-                .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
-                .collect(Collectors.toList());
-    }
-
-    public BookingDto update(int bookingId, int userId, boolean approved) {
-        if (bookingRepository.findById(bookingId).get().getItem().getOwner().getId() != userId) {
-            log.warn("user mismatched");
-            throw new NotFoundException(String.format(
-                    "User with id: %s does not own this item",
-                    userId));
-        }
-        if (bookingRepository.findById(bookingId).get().getStatus() == Status.APPROVED) {
-            log.warn("Booking already approved");
-            throw new BadRequestException(String.format("Booking with id: %s already approved", bookingId));
-        }
-        Booking updateBooking = bookingRepository.findById(bookingId).get();
-        if (approved) {
-            updateBooking.setStatus(Status.APPROVED);
-        } else {
-            updateBooking.setStatus(Status.REJECTED);
-        }
-        log.info("Booking updated");
-        return BookingMapper.toBookingDto(bookingRepository.save(updateBooking));
-    }
-
-    public BookingDto getBooking(int bookingId, int userId) {
-        if (bookingRepository.findById(bookingId).isEmpty()) {
-            log.warn("booking not found");
-            throw new NotFoundException(String.format(
-                    "Booking with id: %s not found", bookingId));
-        }
-        if ((bookingRepository.findById(bookingId).get().getBooker().getId() != userId) &&
-                (bookingRepository.findById(bookingId).get().getItem().getOwner().getId() != userId)
-        ) {
-            log.warn("user mismatched");
-            throw new NotFoundException(String.format(
-                    "User with id: %s does not booked this item",
-                    userId));
-        }
-        return BookingMapper.toBookingDto(bookingRepository.findById(bookingId).get());
+        return bookingStatus;
     }
 }

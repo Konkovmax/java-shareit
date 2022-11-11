@@ -17,15 +17,17 @@ import javax.persistence.*;
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private int id;
+    @Column(nullable = false)
     private String name;
     private String description;
     @Column(name = "is_available")
     private Boolean available;
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "request_id")
     private ItemRequest request;
 

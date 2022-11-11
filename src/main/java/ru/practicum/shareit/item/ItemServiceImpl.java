@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
-import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDateDto;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -12,6 +11,7 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
@@ -37,15 +37,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public ItemDto create(ItemDto item, int userId) {
-        item.setOwner(userRepository.findById(userId).get());
-        return ItemMapper.toItemDto(itemRepository.save(ItemMapper.toItem(item)));
+        User user = userRepository.findById(userId).orElseThrow();
+        item.setOwner(user);
+        Item newItem = itemRepository.save(ItemMapper.toItem(item));
+        return ItemMapper.toItemDto(newItem);
     }
 
     public CommentDto createComment(int itemId, CommentDto commentDto, int userId) {
-        if (bookingRepository.getBookingsByItem_IdOrderByStart(itemId).stream()
-                .filter(x -> x.getBooker().getId() == userId)
-                .filter(x -> x.getStatus() == Status.APPROVED)
-                .filter(x -> x.getEnd().isBefore(LocalDateTime.now())).count() == 0) {
+        if (bookingRepository.getBookingsByItem_IdAndBooker_IdAndStatus_ApprovedIs(
+                itemId, userId, LocalDateTime.now()).isEmpty()) {
             log.warn("user does not booked this item");
             throw new BadRequestException(String.format(
                     "User with id: %s does not booked this item",
@@ -53,8 +53,8 @@ public class ItemServiceImpl implements ItemService {
         }
         Comment newComment = new Comment();
         newComment.setText(commentDto.getText());
-        newComment.setItem(itemRepository.findById(itemId).get());
-        newComment.setAuthor(userRepository.findById(userId).get());
+        newComment.setItem(itemRepository.findById(itemId).orElseThrow());
+        newComment.setAuthor(userRepository.findById(userId).orElseThrow());
         newComment.setCreated(LocalDateTime.now());
         return ItemMapper.toCommentDto(commentRepository.save(newComment));
     }
@@ -91,13 +91,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public ItemDto update(int id, ItemDto item, int userId) {
-        if (itemRepository.findById(id).get().getOwner().getId() != userId) {
+        if (itemRepository.findById(id).orElseThrow().getOwner().getId() != userId) {
             log.warn("user mismatched");
             throw new NotFoundException(String.format(
                     "User with id: %s does not own this item",
                     userId));
         }
-        Item updateItem = itemRepository.findById(id).get();
+        Item updateItem = itemRepository.findById(id).orElseThrow();
         if (item.getName() != null) {
             updateItem.setName(item.getName());
         }
@@ -117,12 +117,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public ItemDto getItem(int itemId, int userId) {
-        if (itemRepository.findById(itemId).isEmpty()) {
-            log.warn("item not found");
-            throw new NotFoundException(String.format(
-                    "Item with id: %s not found", itemId));
-        }
-        ItemDto itemWithBooking = ItemMapper.toItemDto(itemRepository.findById(itemId).get());
+        itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(String.format(
+                "Item with id: %s not found", itemId)));
+        ItemDto itemWithBooking = ItemMapper.toItemDto(itemRepository.findById(itemId).orElseThrow());
         List<BookingDateDto> bookings =
                 bookingRepository.getBookingsByItem_IdOrderByStart(itemId).stream()
                         .filter(x -> x.getItem().getOwner().getId() == userId)

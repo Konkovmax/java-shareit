@@ -12,9 +12,10 @@ import java.time.LocalDate;
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private int id;
     private String description;
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "requester_id")
     private User requester;
     private LocalDate created;
