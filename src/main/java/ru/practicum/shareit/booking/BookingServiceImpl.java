@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.dto.BookingIncomeDto;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
@@ -31,15 +32,16 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto create(BookingIncomeDto bookingIncome, int userId) {
         throwIfNotValid(bookingIncome);
         int itemId = bookingIncome.getItemId();
-        itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(String.format(
-                "Item with id: %s not found", itemId)));
-        if (!itemRepository.findById(itemId).orElseThrow().getAvailable()) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException(String.format(
+                        "Item with id: %s not found", itemId)));
+        if (!item.getAvailable()) {
             log.warn("Item is not available");
             throw new BadRequestException(String.format(
                     "Item with id: %s is not available",
                     bookingIncome.getItemId()));
         }
-        if (itemRepository.findById(itemId).orElseThrow().getOwner().getId() == userId) {
+        if (item.getOwner().getId() == userId) {
             log.warn("user mismatched");
             throw new NotFoundException(String.format(
                     "User with id: %s does already own this item",
@@ -54,10 +56,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public List<BookingDto> getAllForUser(int userId, String stateIncome) {
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format(
-                "User with id: %s not found", userId)));
-        //как сюда ещё логирование ввернуть - что-то не нашёл... или это как-то подругому делается?
-        //log.warn("user not found");
+        userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.warn("user not found");
+                    throw new NotFoundException(String.format(
+                            "User with id: %s not found", userId));
+                });
         return bookingRepository.getBookingByBooker_Id(userId).stream()
                 .filter(bookingStatus(stateIncome))
                 .map(BookingMapper::toBookingDto)
@@ -66,8 +70,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public List<BookingDto> getAllForOwner(int userId, String stateIncome) {
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format(
-                "User with id: %s not found", userId)));
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format(
+                        "User with id: %s not found", userId)));
         return bookingRepository.getBookingByOwner_Id(userId).stream()
                 .filter(bookingStatus(stateIncome))
                 .map(BookingMapper::toBookingDto)
@@ -97,17 +102,18 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public BookingDto getBooking(int bookingId, int userId) {
-        bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException(String.format(
-                "Booking with id: %s not found", bookingId)));
-        if ((bookingRepository.findById(bookingId).orElseThrow().getBooker().getId() != userId) &&
-                (bookingRepository.findById(bookingId).orElseThrow().getItem().getOwner().getId() != userId)
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException(String.format(
+                        "Booking with id: %s not found", bookingId)));
+        if ((booking.getBooker().getId() != userId) &&
+                (booking.getItem().getOwner().getId() != userId)
         ) {
             log.warn("user mismatched");
             throw new NotFoundException(String.format(
                     "User with id: %s does not booked this item",
                     userId));
         }
-        return BookingMapper.toBookingDto(bookingRepository.findById(bookingId).orElseThrow());
+        return BookingMapper.toBookingDto(booking);
     }
 
     private void throwIfNotValid(BookingIncomeDto booking) throws BadRequestException {

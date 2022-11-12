@@ -72,8 +72,7 @@ public class ItemServiceImpl implements ItemService {
             }
             return i;
         };
-        return itemRepository.findAll().stream()
-                .filter(x -> x.getOwner().getId() == userId)
+        return itemRepository.getItemByOwner_Id(userId).stream()
                 .map(ItemMapper::toItemDto)
                 .map(addBooking)
                 .collect(Collectors.toList());
