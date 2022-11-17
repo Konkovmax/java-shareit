@@ -16,6 +16,6 @@ public interface ItemService {
 
     void delete(int itemId);
 
-    ItemDto getItem(int itemId);
+    ItemDto getItem(int itemId, int userId);
 
 }

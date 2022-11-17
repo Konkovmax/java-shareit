@@ -2,39 +2,79 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.dto.BookingDateDto;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.InMemoryUserStorage;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class ItemServiceImpl implements ItemService {
-    private final InMemoryItemStorage itemStorage;
-    private final InMemoryUserStorage userStorage;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
-    public ItemServiceImpl(InMemoryItemStorage itemStorage, InMemoryUserStorage userStorage) {
-        this.itemStorage = itemStorage;
-        this.userStorage = userStorage;
+    public ItemServiceImpl(ItemRepository itemRepository, BookingRepository bookingRepository,
+                           UserRepository userRepository, CommentRepository commentRepository) {
+        this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
+        this.commentRepository = commentRepository;
     }
 
     public ItemDto create(ItemDto item, int userId) {
-        if (!userStorage.users.containsKey(userId)) {
-            log.warn("user not found");
-            throw new NotFoundException(String.format(
-                    "User with id: %s not found",
+        User user = userRepository.findById(userId).orElseThrow();
+        item.setOwner(user);
+        Item newItem = itemRepository.save(ItemMapper.toItem(item));
+        return ItemMapper.toItemDto(newItem);
+    }
+
+    public CommentDto createComment(int itemId, CommentDto commentDto, int userId) {
+        if (bookingRepository.getBookingsByItem_IdAndBooker_IdAndStatus_ApprovedIs(
+                itemId, userId, LocalDateTime.now()).isEmpty()) {
+            log.warn("user does not booked this item");
+            throw new BadRequestException(String.format(
+                    "User with id: %s does not booked this item",
                     userId));
         }
-        item.setOwner(userStorage.getUser(userId));
-        return itemStorage.create(ItemMapper.toItem(item));
+        Comment newComment = new Comment();
+        newComment.setText(commentDto.getText());
+        newComment.setItem(itemRepository.findById(itemId).orElseThrow());
+        newComment.setAuthor(userRepository.findById(userId).orElseThrow());
+        newComment.setCreated(LocalDateTime.now());
+        return ItemMapper.toCommentDto(commentRepository.save(newComment));
     }
 
     public List<ItemDto> getAll(int userId) {
-        return itemStorage.getAll(userId).stream()
-                .map(object -> ItemMapper.toItemDto(object))
+        Function<ItemDto, ItemDto> addBooking = i -> {
+            List<BookingDateDto> bookings =
+                    bookingRepository.getBookingsByItem_IdOrderByStart(i.getId()).stream()
+                            .filter(x -> x.getItem().getOwner().getId() == userId)
+                            .map(BookingMapper::toBookingDateDto)
+                            .collect(Collectors.toList());
+            if (!bookings.isEmpty()) {
+                i.setLastBooking(bookings.get(0));
+                i.setNextBooking(bookings.get(bookings.size() - 1));
+            }
+            return i;
+        };
+        return itemRepository.getItemByOwner_Id(userId).stream()
+                .map(ItemMapper::toItemDto)
+                .map(addBooking)
                 .collect(Collectors.toList());
     }
 
@@ -43,45 +83,54 @@ public class ItemServiceImpl implements ItemService {
             return new ArrayList<>();
         } else {
             String adaptedQuery = query.toLowerCase();
-            return itemStorage.search(adaptedQuery).stream()
-                    .map(object -> ItemMapper.toItemDto(object))
+            return itemRepository.search(adaptedQuery).stream()
+                    .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
         }
     }
 
     public ItemDto update(int id, ItemDto item, int userId) {
-        if (!userStorage.users.containsKey(userId)) {
-            log.warn("user not found");
-            throw new NotFoundException(String.format(
-                    "User with id: %s not found",
-                    userId));
-        }
-        if (itemStorage.items.get(id).getOwner().getId() != userId) {
+        if (itemRepository.findById(id).orElseThrow().getOwner().getId() != userId) {
             log.warn("user mismatched");
             throw new NotFoundException(String.format(
                     "User with id: %s does not own this item",
                     userId));
         }
-        if (!itemStorage.items.containsKey(id)) {
-            log.warn("item not found");
-            throw new NotFoundException(String.format(
-                    "Item with id: %s not found",
-                    id));
+        Item updateItem = itemRepository.findById(id).orElseThrow();
+        if (item.getName() != null) {
+            updateItem.setName(item.getName());
         }
-        return ItemMapper.toItemDto(itemStorage.update(id, ItemMapper.toItem(item)));
+        if (item.getDescription() != null) {
+            updateItem.setDescription(item.getDescription());
+        }
+        if (item.getAvailable() != null) {
+            updateItem.setAvailable(item.getAvailable());
+        }
+        log.info("Item updated");
+
+        return ItemMapper.toItemDto(itemRepository.save(updateItem));
     }
 
     public void delete(int itemId) {
-        if (itemStorage.items.containsKey(itemId)) {
-            log.warn("item not found");
-            throw new NotFoundException(String.format(
-                    "Item with id: %s not found",
-                    itemId));
-        }
-        itemStorage.delete(itemId);
+        itemRepository.deleteById(itemId);
     }
 
-    public ItemDto getItem(int itemId) {
-        return ItemMapper.toItemDto(itemStorage.getItem(itemId));
+    public ItemDto getItem(int itemId, int userId) {
+        itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(String.format(
+                "Item with id: %s not found", itemId)));
+        ItemDto itemWithBooking = ItemMapper.toItemDto(itemRepository.findById(itemId).orElseThrow());
+        List<BookingDateDto> bookings =
+                bookingRepository.getBookingsByItem_IdOrderByStart(itemId).stream()
+                        .filter(x -> x.getItem().getOwner().getId() == userId)
+                        .map(BookingMapper::toBookingDateDto)
+                        .collect(Collectors.toList());
+        if (!bookings.isEmpty()) {
+            itemWithBooking.setLastBooking(bookings.get(0));
+            itemWithBooking.setNextBooking(bookings.get(bookings.size() - 1));
+        }
+        itemWithBooking.setComments(commentRepository.getCommentsByItem_Id(itemId).stream()
+                .map(ItemMapper::toCommentDto)
+                .collect(Collectors.toList()));
+        return itemWithBooking;
     }
 }
