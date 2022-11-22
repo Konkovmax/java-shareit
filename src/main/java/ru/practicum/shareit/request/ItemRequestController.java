@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import javax.validation.Valid;
+import java.util.List;
 
 
 @RestController
@@ -21,18 +22,18 @@ public class ItemRequestController {
         return requestService.create(requestDto, userId);
     }
 
-//    @GetMapping
-//    public List<ItemRequestDto> getAll(@RequestHeader(value = "X-Sharer-User-Id") int userId,
-//                                   @RequestParam(value = "state", defaultValue = "ALL", required = false) String state) {
-//        return requestService.getAllForUser(userId, state);
-//    }
-//
-//    @GetMapping("/owner")
-//    public List<ItemRequestDto> getAllOwners(@RequestHeader(value = "X-Sharer-User-Id") int userId,
-//                                         @RequestParam(value = "state", defaultValue = "ALL", required = false) String state) {
-//        return requestService.getAllForOwner(userId, state);
-//    }
-//
+    @GetMapping
+    public List<ItemRequestDto> getOwn(@RequestHeader(value = "X-Sharer-User-Id") int userId){
+        return requestService.getOwn(userId);
+    }
+
+    @GetMapping("/all")
+    public List<ItemRequestDto> getAll(@RequestHeader(value = "X-Sharer-User-Id") int userId,
+                                         @RequestParam(value = "from", defaultValue = "0", required = false) int from,
+                                       @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
+        return requestService.getAll(userId, from, size);
+    }
+
 //    @GetMapping("/{bookingId}")
 //    public ItemRequestDto get(@PathVariable("bookingId") Integer bookingId,
 //                          @RequestHeader(value = "X-Sharer-User-Id") int userId) {

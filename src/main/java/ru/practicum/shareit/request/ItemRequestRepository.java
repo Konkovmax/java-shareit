@@ -3,6 +3,7 @@ package ru.practicum.shareit.request;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import java.util.List;
 
@@ -13,6 +14,6 @@ public interface ItemRequestRepository extends JpaRepository<ItemRequest, Intege
 //            " or upper(i.description) like upper(concat('%', ?1, '%')))" +
 //            "and i.available is true ")
 //    List<Item> search(String query);
-//
-//    List<Item> getItemByOwner_Id(int ownerId);
+
+    List<ItemRequest> getItemRequestByRequester_Id(int requesterId);
 }
