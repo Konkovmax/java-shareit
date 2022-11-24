@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingIncomeDto;
@@ -55,28 +57,38 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
-    public List<BookingDto> getAllForUser(int userId, String stateIncome) {
+    public List<BookingDto> getAllForUser(int userId, int from, int size, String stateIncome) {
+        if (from<0||size<1){
+            log.warn("Incorrect pagination parameters");
+            throw new BadRequestException("Incorrect pagination parameters");
+        }
         userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.warn("user not found");
                     throw new NotFoundException(String.format(
                             "User with id: %s not found", userId));
                 });
-        return bookingRepository.getBookingByBooker_Id(userId).stream()
+        return bookingRepository.getBookingByBooker_Id(userId,
+                        PageRequest.of(setPage(from, size),size, Sort.by("start").descending())).stream()
                 .filter(bookingStatus(stateIncome))
                 .map(BookingMapper::toBookingDto)
-                .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
+                //.sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
                 .collect(Collectors.toList());
     }
 
-    public List<BookingDto> getAllForOwner(int userId, String stateIncome) {
+    public List<BookingDto> getAllForOwner(int userId, int from, int size, String stateIncome) {
+        if (from<0||size<1){
+            log.warn("Incorrect pagination parameters");
+            throw new BadRequestException("Incorrect pagination parameters");
+        }
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format(
                         "User with id: %s not found", userId)));
-        return bookingRepository.getBookingByOwner_Id(userId).stream()
+        return bookingRepository.getBookingByOwner_Id(userId,
+                PageRequest.of(setPage(from, size), size, Sort.by("start").descending())).stream()
                 .filter(bookingStatus(stateIncome))
                 .map(BookingMapper::toBookingDto)
-                .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
+               // .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
                 .collect(Collectors.toList());
     }
 
@@ -168,5 +180,9 @@ public class BookingServiceImpl implements BookingService {
             }
         }
         return bookingStatus;
+    }
+
+    private int setPage(int from, int size){
+        return  (size>from)? 0 : from/size;
     }
 }
