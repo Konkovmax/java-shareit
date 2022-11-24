@@ -11,6 +11,8 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -27,19 +29,31 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     public ItemServiceImpl(ItemRepository itemRepository, BookingRepository bookingRepository,
-                           UserRepository userRepository, CommentRepository commentRepository) {
+                           UserRepository userRepository, CommentRepository commentRepository,
+                           ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     public ItemDto create(ItemDto item, int userId) {
         User user = userRepository.findById(userId).orElseThrow();
         item.setOwner(user);
-        Item newItem = itemRepository.save(ItemMapper.toItem(item));
+        ItemRequest request = null;
+                if (item.getRequestId() != 0) {
+            request = itemRequestRepository.findById(item.getRequestId())
+                    .orElseThrow(() -> {
+                        log.warn("Request with id: %s not found", item.getRequestId());
+                        throw new NotFoundException(String.format(
+                                "Request with id: %s not found", item.getRequestId()));
+                    });
+        }
+        Item newItem = itemRepository.save(ItemMapper.toItem(item,request));
         return ItemMapper.toItemDto(newItem);
     }
 

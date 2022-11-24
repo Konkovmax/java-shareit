@@ -8,7 +8,9 @@ public class ItemRequestMapper {
                 request.getId(),
                 request.getDescription(),
                 request.getRequester(),
-                request.getCreated()
+                request.getCreated(),
+                null
+//                request.getItem()
         );
     }
 
@@ -18,6 +20,7 @@ public class ItemRequestMapper {
                 request.getDescription(),
                 request.getRequester(),
                 request.getCreated()
+                // request.getItem()
         );
     }
 }

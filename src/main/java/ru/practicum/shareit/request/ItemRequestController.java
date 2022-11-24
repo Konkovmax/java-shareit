@@ -34,10 +34,10 @@ public class ItemRequestController {
         return requestService.getAll(userId, from, size);
     }
 
-//    @GetMapping("/{bookingId}")
-//    public ItemRequestDto get(@PathVariable("bookingId") Integer bookingId,
-//                          @RequestHeader(value = "X-Sharer-User-Id") int userId) {
-//        return requestService.getItemRequest(bookingId, userId);
-//    }
+    @GetMapping("/{requestId}")
+    public ItemRequestDto get(@PathVariable("requestId") Integer requestId,
+                          @RequestHeader(value = "X-Sharer-User-Id") int userId) {
+        return requestService.get(requestId, userId);
+    }
 
 }

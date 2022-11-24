@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.user.User;
@@ -13,6 +16,7 @@ import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,10 +25,13 @@ import java.util.stream.Collectors;
 public class ItemRequestService {
     private final ItemRequestRepository requestRepository;
     private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
 
-    public ItemRequestService(ItemRequestRepository requestRepository, UserRepository userRepository) {
+    public ItemRequestService(ItemRequestRepository requestRepository, UserRepository userRepository,
+                              ItemRepository itemRepository) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
+        this.itemRepository = itemRepository;
     }
 
     public ItemRequestDto create(ItemRequestDto requestDto, int userId) {
@@ -45,8 +52,11 @@ public class ItemRequestService {
             log.warn("Incorrect pagination parameters");
             throw new BadRequestException("Incorrect pagination parameters");
         }
-        return requestRepository.findAll().stream()
+        return requestRepository.findItemRequestByRequester_IdNot(userId).stream()
                 .map(ItemRequestMapper::toItemRequestDto)
+                .peek(x ->x.setItems(itemRepository.getItemByRequest_Id(x.getId()).stream()
+                        .map(ItemMapper::toItemDto)
+                        .collect(Collectors.toList())))
                 .collect(Collectors.toList());
     }
 
@@ -58,6 +68,22 @@ public class ItemRequestService {
         log.info("ItemRequest found");
         return requestRepository.getItemRequestByRequester_Id(userId).stream()
                 .map(ItemRequestMapper::toItemRequestDto)
+                .peek(x ->x.setItems(itemRepository.getItemByRequest_Id(x.getId()).stream()
+                        .map(ItemMapper::toItemDto)
+                        .collect(Collectors.toList())))
                 .collect(Collectors.toList());
+    }
+    public ItemRequestDto get(int requestId, int userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format(
+                        "User with id: %s not found", userId)));
+        log.info("ItemRequest found");
+        ItemRequestDto request = ItemRequestMapper.toItemRequestDto(requestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException(String.format(
+                        "Request with id: %s not found", requestId))));
+        request.setItems(itemRepository.getItemByRequest_Id(request.getId()).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList()));
+        return request;
     }
 }

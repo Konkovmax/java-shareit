@@ -3,6 +3,7 @@ package ru.practicum.shareit.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
@@ -24,4 +25,7 @@ public class ItemRequest {
     @JoinColumn(name = "requester_id")
     private User requester;
     private LocalDateTime created;
+//    @ManyToOne
+//    @JoinColumn(name = "item_id")
+//    private Item item;
 }

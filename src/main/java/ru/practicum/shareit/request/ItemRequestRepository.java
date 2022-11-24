@@ -16,4 +16,6 @@ public interface ItemRequestRepository extends JpaRepository<ItemRequest, Intege
 //    List<Item> search(String query);
 
     List<ItemRequest> getItemRequestByRequester_Id(int requesterId);
+
+    List<ItemRequest> findItemRequestByRequester_IdNot(int requesterId);
 }
