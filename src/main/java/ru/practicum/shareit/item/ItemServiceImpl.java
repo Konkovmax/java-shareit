@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -48,7 +49,8 @@ public class ItemServiceImpl implements ItemService {
                 if (item.getRequestId() != 0) {
             request = itemRequestRepository.findById(item.getRequestId())
                     .orElseThrow(() -> {
-                        log.warn("Request with id: %s not found", item.getRequestId());
+                        log.warn(String.format(
+                                "Request with id: %s not found", item.getRequestId()));
                         throw new NotFoundException(String.format(
                                 "Request with id: %s not found", item.getRequestId()));
                     });
@@ -73,7 +75,7 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toCommentDto(commentRepository.save(newComment));
     }
 
-    public List<ItemDto> getAll(int userId) {
+    public List<ItemDto> getAll(int userId, int from, int size) {
         Function<ItemDto, ItemDto> addBooking = i -> {
             List<BookingDateDto> bookings =
                     bookingRepository.getBookingsByItem_IdOrderByStart(i.getId()).stream()
@@ -86,18 +88,18 @@ public class ItemServiceImpl implements ItemService {
             }
             return i;
         };
-        return itemRepository.getItemByOwner_Id(userId).stream()
+        return itemRepository.getItemByOwner_Id(userId, PageRequest.of((size>from)? 0 : from/size, size)).stream()
                 .map(ItemMapper::toItemDto)
                 .map(addBooking)
                 .collect(Collectors.toList());
     }
 
-    public List<ItemDto> search(String query) {
+    public List<ItemDto> search(String query,int from, int size) {
         if (query.isEmpty()) {
             return new ArrayList<>();
         } else {
             String adaptedQuery = query.toLowerCase();
-            return itemRepository.search(adaptedQuery).stream()
+            return itemRepository.search(adaptedQuery, PageRequest.of((size>from)? 0 : from/size, size)).stream()
                     .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
         }

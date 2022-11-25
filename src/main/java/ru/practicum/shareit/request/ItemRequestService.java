@@ -1,22 +1,18 @@
 package ru.practicum.shareit.request;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,10 +37,6 @@ public class ItemRequestService {
         requestDto.setRequester(user);
         requestDto.setCreated(LocalDateTime.now());
             return ItemRequestMapper.toItemRequestDto(requestRepository.save(ItemRequestMapper.toItemRequest(requestDto)));
-//        } catch (DataIntegrityViolationException e) {
-//            log.error("Duplicated Email");
-//            throw new ConflictException("Email can't duplicated");
-//        }
     }
 
     public List<ItemRequestDto> getAll(int userId, int from, int size) {
@@ -52,7 +44,10 @@ public class ItemRequestService {
             log.warn("Incorrect pagination parameters");
             throw new BadRequestException("Incorrect pagination parameters");
         }
-        return requestRepository.findItemRequestByRequester_IdNot(userId).stream()
+        return requestRepository.findItemRequestByRequester_IdNot(userId,
+                        //тут я что-то засомневался, толи тренарник прямо так запихивать, или лучше как в букингсервис -
+                // в отдельный метод?
+                        PageRequest.of((size>from)? 0 : from/size, size, Sort.by("created").descending())).stream()
                 .map(ItemRequestMapper::toItemRequestDto)
                 .peek(x ->x.setItems(itemRepository.getItemByRequest_Id(x.getId()).stream()
                         .map(ItemMapper::toItemDto)

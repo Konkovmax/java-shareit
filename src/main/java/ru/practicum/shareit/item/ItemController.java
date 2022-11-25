@@ -17,38 +17,41 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto create(@Valid @RequestBody ItemDto item, @RequestHeader(value = "X-Sharer-User-Id",
-            required = true) int userId) {
+    public ItemDto create(@Valid @RequestBody ItemDto item, @RequestHeader(value = "X-Sharer-User-Id") int userId) {
         return itemService.create(item, userId);
     }
 
     @PostMapping("{itemId}/comment")
     public CommentDto createComment(@PathVariable("itemId") Integer itemId,
                                     @Valid @RequestBody CommentDto commentDto,
-                                    @RequestHeader(value = "X-Sharer-User-Id", required = true) int userId) {
+                                    @RequestHeader(value = "X-Sharer-User-Id") int userId) {
         return itemService.createComment(itemId, commentDto, userId);
     }
 
     @GetMapping
-    public List<ItemDto> getAll(@RequestHeader(value = "X-Sharer-User-Id", required = true) int userId) {
-        return itemService.getAll(userId);
+    public List<ItemDto> getAll(@RequestHeader(value = "X-Sharer-User-Id") int userId,
+                                @RequestParam(value = "from", defaultValue = "0", required = false) int from,
+                                @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
+        return itemService.getAll(userId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam(value = "text", required = true) String query) {
-        return itemService.search(query);
+    public List<ItemDto> search(@RequestParam(value = "text") String query,
+                                @RequestParam(value = "from", defaultValue = "0", required = false) int from,
+                                @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
+        return itemService.search(query, from, size);
     }
 
     @GetMapping("/{id}")
     public ItemDto get(@PathVariable("id") Integer itemId,
-                       @RequestHeader(value = "X-Sharer-User-Id", required = true) int userId) {
+                       @RequestHeader(value = "X-Sharer-User-Id") int userId) {
         return itemService.getItem(itemId, userId);
     }
 
     @PatchMapping("/{id}")
     public ItemDto update(@PathVariable int id,
                           @RequestBody ItemDto item,
-                          @RequestHeader(value = "X-Sharer-User-Id", required = true) int userId) {
+                          @RequestHeader(value = "X-Sharer-User-Id") int userId) {
         return itemService.update(id, item, userId);
     }
 
