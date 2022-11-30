@@ -32,15 +32,7 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getAvailable(),
                 item.getOwner(),
-                item.getRequestId() != 0 ?
-                request
-//                        itemRequestRepository.findById(item.getRequestId())
-//                        .orElseThrow(() -> {
-//                            log.warn( "Request with id: %s not found", item.getRequestId());
-//                            throw new NotFoundException(String.format(
-//                                    "Request with id: %s not found", item.getRequestId()));
-//                        })
-                        : null
+                item.getRequestId() != 0 ? request : null
         );
     }
 

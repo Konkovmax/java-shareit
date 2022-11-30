@@ -128,7 +128,7 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDto(booking);
     }
 
-    private void throwIfNotValid(BookingIncomeDto booking) throws BadRequestException {
+    public void throwIfNotValid(BookingIncomeDto booking) throws BadRequestException {
         if (booking.getEnd().isBefore(LocalDateTime.now())) {
             log.error("Booking ending can't be in the past");
             throw new BadRequestException("Booking ending can't be in the past");
