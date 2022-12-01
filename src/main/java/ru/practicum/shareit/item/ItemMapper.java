@@ -25,7 +25,7 @@ public class ItemMapper {
         );
     }
 
-    public static Item toItem(ItemDto item,ItemRequest request) {
+    public static Item toItem(ItemDto item, ItemRequest request) {
         return new Item(
                 item.getId(),
                 item.getName(),

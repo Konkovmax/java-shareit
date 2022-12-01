@@ -1,24 +1,13 @@
 package ru.practicum.shareit;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
 import ru.practicum.shareit.item.ItemServiceImpl;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserDto;
-import ru.practicum.shareit.user.UserService;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
@@ -28,8 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 //@Sql("/testdata.sql")
 class ItemServiceTests {
     private final ItemServiceImpl itemService;
-    private final UserService userService;
-
 //    @BeforeAll
 //    public void prepareUser(){
 //        UserDto user = new UserDto(1, "Ivanov", "ivan@ivan.iv");
@@ -71,7 +58,7 @@ class ItemServiceTests {
         item.setName("Name");
         item.setDescription("Description");
         item.setAvailable(true);
-        ItemDto savedItem = itemService.create(item,1);
+        ItemDto savedItem = itemService.create(item, 1);
         //savedUser.setId(userId);
         assertEquals(item, savedItem, "Users not equal");
     }

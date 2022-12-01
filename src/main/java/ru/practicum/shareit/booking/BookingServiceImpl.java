@@ -58,7 +58,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public List<BookingDto> getAllForUser(int userId, int from, int size, String stateIncome) {
-        if (from<0||size<1){
+        if (from < 0 || size < 1) {
             log.warn("Incorrect pagination parameters");
             throw new BadRequestException("Incorrect pagination parameters");
         }
@@ -69,7 +69,7 @@ public class BookingServiceImpl implements BookingService {
                             "User with id: %s not found", userId));
                 });
         return bookingRepository.getBookingByBooker_Id(userId,
-                        PageRequest.of(setPage(from, size),size, Sort.by("start").descending())).stream()
+                        PageRequest.of(setPage(from, size), size, Sort.by("start").descending())).stream()
                 .filter(bookingStatus(stateIncome))
                 .map(BookingMapper::toBookingDto)
                 //.sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
@@ -77,7 +77,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public List<BookingDto> getAllForOwner(int userId, int from, int size, String stateIncome) {
-        if (from<0||size<1){
+        if (from < 0 || size < 1) {
             log.warn("Incorrect pagination parameters");
             throw new BadRequestException("Incorrect pagination parameters");
         }
@@ -85,10 +85,10 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException(String.format(
                         "User with id: %s not found", userId)));
         return bookingRepository.getBookingByOwner_Id(userId,
-                PageRequest.of(setPage(from, size), size, Sort.by("start").descending())).stream()
+                        PageRequest.of(setPage(from, size), size, Sort.by("start").descending())).stream()
                 .filter(bookingStatus(stateIncome))
                 .map(BookingMapper::toBookingDto)
-               // .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
+                // .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
                 .collect(Collectors.toList());
     }
 
@@ -182,7 +182,7 @@ public class BookingServiceImpl implements BookingService {
         return bookingStatus;
     }
 
-    private int setPage(int from, int size){
-        return  (size>from)? 0 : from/size;
+    private int setPage(int from, int size) {
+        return (size > from) ? 0 : from / size;
     }
 }

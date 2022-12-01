@@ -46,7 +46,7 @@ public class ItemServiceImpl implements ItemService {
         User user = userRepository.findById(userId).orElseThrow();
         item.setOwner(user);
         ItemRequest request = null;
-                if (item.getRequestId() != 0) {
+        if (item.getRequestId() != 0) {
             request = itemRequestRepository.findById(item.getRequestId())
                     .orElseThrow(() -> {
                         log.warn(String.format(
@@ -55,7 +55,7 @@ public class ItemServiceImpl implements ItemService {
                                 "Request with id: %s not found", item.getRequestId()));
                     });
         }
-        Item newItem = itemRepository.save(ItemMapper.toItem(item,request));
+        Item newItem = itemRepository.save(ItemMapper.toItem(item, request));
         return ItemMapper.toItemDto(newItem);
     }
 
@@ -88,18 +88,18 @@ public class ItemServiceImpl implements ItemService {
             }
             return i;
         };
-        return itemRepository.getItemByOwner_Id(userId, PageRequest.of((size>from)? 0 : from/size, size)).stream()
+        return itemRepository.getItemByOwner_Id(userId, PageRequest.of((size > from) ? 0 : from / size, size)).stream()
                 .map(ItemMapper::toItemDto)
                 .map(addBooking)
                 .collect(Collectors.toList());
     }
 
-    public List<ItemDto> search(String query,int from, int size) {
+    public List<ItemDto> search(String query, int from, int size) {
         if (query.isEmpty()) {
             return new ArrayList<>();
         } else {
             String adaptedQuery = query.toLowerCase();
-            return itemRepository.search(adaptedQuery, PageRequest.of((size>from)? 0 : from/size, size)).stream()
+            return itemRepository.search(adaptedQuery, PageRequest.of((size > from) ? 0 : from / size, size)).stream()
                     .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
         }

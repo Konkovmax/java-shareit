@@ -8,9 +8,9 @@ public interface ItemService {
 
     ItemDto create(ItemDto item, int userId);
 
-    List<ItemDto> getAll(int userId,int from, int size);
+    List<ItemDto> getAll(int userId, int from, int size);
 
-    List<ItemDto> search(String query,int from, int size);
+    List<ItemDto> search(String query, int from, int size);
 
     ItemDto update(int id, ItemDto item, int userId);
 

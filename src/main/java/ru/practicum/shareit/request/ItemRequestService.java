@@ -36,20 +36,20 @@ public class ItemRequestService {
                         "User with id: %s not found", userId)));
         requestDto.setRequester(user);
         requestDto.setCreated(LocalDateTime.now());
-            return ItemRequestMapper.toItemRequestDto(requestRepository.save(ItemRequestMapper.toItemRequest(requestDto)));
+        return ItemRequestMapper.toItemRequestDto(requestRepository.save(ItemRequestMapper.toItemRequest(requestDto)));
     }
 
     public List<ItemRequestDto> getAll(int userId, int from, int size) {
-        if (from<0||size<1){
+        if (from < 0 || size < 1) {
             log.warn("Incorrect pagination parameters");
             throw new BadRequestException("Incorrect pagination parameters");
         }
         return requestRepository.findItemRequestByRequester_IdNot(userId,
                         //тут я что-то засомневался, толи тренарник прямо так запихивать, или лучше как в букингсервис -
-                // в отдельный метод?
-                        PageRequest.of((size>from)? 0 : from/size, size, Sort.by("created").descending())).stream()
+                        // в отдельный метод?
+                        PageRequest.of((size > from) ? 0 : from / size, size, Sort.by("created").descending())).stream()
                 .map(ItemRequestMapper::toItemRequestDto)
-                .peek(x ->x.setItems(itemRepository.getItemByRequest_Id(x.getId()).stream()
+                .peek(x -> x.setItems(itemRepository.getItemByRequest_Id(x.getId()).stream()
                         .map(ItemMapper::toItemDto)
                         .collect(Collectors.toList())))
                 .collect(Collectors.toList());
@@ -63,11 +63,12 @@ public class ItemRequestService {
         log.info("ItemRequest found");
         return requestRepository.getItemRequestByRequester_Id(userId).stream()
                 .map(ItemRequestMapper::toItemRequestDto)
-                .peek(x ->x.setItems(itemRepository.getItemByRequest_Id(x.getId()).stream()
+                .peek(x -> x.setItems(itemRepository.getItemByRequest_Id(x.getId()).stream()
                         .map(ItemMapper::toItemDto)
                         .collect(Collectors.toList())))
                 .collect(Collectors.toList());
     }
+
     public ItemRequestDto get(int requestId, int userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format(
