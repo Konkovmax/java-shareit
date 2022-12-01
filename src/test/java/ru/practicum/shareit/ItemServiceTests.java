@@ -1,14 +1,9 @@
 package ru.practicum.shareit;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.practicum.shareit.item.ItemServiceImpl;
-import ru.practicum.shareit.item.dto.ItemDto;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -16,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 //@Sql("/testschema.sql")
 //@Sql("/testdata.sql")
 class ItemServiceTests {
-    private final ItemServiceImpl itemService;
+//    private final ItemServiceImpl itemService;
 //    @BeforeAll
 //    public void prepareUser(){
 //        UserDto user = new UserDto(1, "Ivanov", "ivan@ivan.iv");
@@ -41,27 +36,27 @@ class ItemServiceTests {
 //        assertEquals(3, allUsers.size());
 //    }
 
-    @Test
-    public void testCreateItem() {
-//        UserService mockUserService = Mockito.mock(UserService.class);
-//        //bookService.setAuthorService(mockAuthorService);
+//    @Test
+//    public void testCreateItem() {
+////        UserService mockUserService = Mockito.mock(UserService.class);
+////        //bookService.setAuthorService(mockAuthorService);
+////
+////        Mockito
+////                .when(mockAuthorService.getAuthorDescription(Mockito.anyInt()))
+////                .thenReturn("знаменитый русский писатель");
+////
+////        String bookDescription = bookService.createBookDescription("Война и мир", 1898, 5, "Л.Н.Толстой");
+////
+////        Assertions.assertEquals("Война и мир, 1898 автор Л.Н.Толстой, знаменитый русский писатель", bookDescription);
 //
-//        Mockito
-//                .when(mockAuthorService.getAuthorDescription(Mockito.anyInt()))
-//                .thenReturn("знаменитый русский писатель");
-//
-//        String bookDescription = bookService.createBookDescription("Война и мир", 1898, 5, "Л.Н.Толстой");
-//
-//        Assertions.assertEquals("Война и мир, 1898 автор Л.Н.Толстой, знаменитый русский писатель", bookDescription);
-
-        ItemDto item = new ItemDto();
-        item.setName("Name");
-        item.setDescription("Description");
-        item.setAvailable(true);
-        ItemDto savedItem = itemService.create(item, 1);
-        //savedUser.setId(userId);
-        assertEquals(item, savedItem, "Users not equal");
-    }
+//        ItemDto item = new ItemDto();
+//        item.setName("Name");
+//        item.setDescription("Description");
+//        item.setAvailable(true);
+//        ItemDto savedItem = itemService.create(item, 1);
+//        //savedUser.setId(userId);
+//        assertEquals(item, savedItem, "Users not equal");
+//    }
 
 //    @Test
 //    public void testUpdateUser() {
