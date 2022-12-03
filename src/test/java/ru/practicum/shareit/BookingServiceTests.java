@@ -27,11 +27,11 @@ class BookingServiceTests {
         BadRequestException ex = assertThrows(
                 BadRequestException.class,
                 () -> {
-                    BookingIncomeDto booking = new BookingIncomeDto(LocalDateTime.now().plusDays(3),
-                            LocalDateTime.now().plusDays(2), 1);
+                    BookingIncomeDto booking = new BookingIncomeDto(LocalDateTime.now().minusDays(3),
+                            LocalDateTime.now().plusDays(10), 1);
                     bookingService.throwIfNotValid(booking);
                 });
-        Assertions.assertEquals("Booking start can't be after end", ex.getMessage());
+        Assertions.assertEquals("Booking start can't be in the past", ex.getMessage());
     }
 //    BadRequestException ex1 = assertThrows(
 //                BadRequestException.class,
