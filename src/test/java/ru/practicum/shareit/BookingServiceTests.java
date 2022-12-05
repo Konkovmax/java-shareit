@@ -12,7 +12,6 @@ import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingServiceImpl;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDateDto;
-import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingIncomeDto;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.user.User;
