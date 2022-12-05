@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -88,7 +89,7 @@ public class UserControllerTests {
     }
 
     @Test
-    public void updateUserTest() throws Exception {
+    public void updateUserTestOK() throws Exception {
         UserDto newUser = new UserDto(1, "Name", "email@email.com");
         when(mockRepository.findById(1)).thenReturn(Optional.of(UserMapper.toUser(newUser)));
 
@@ -102,6 +103,24 @@ public class UserControllerTests {
 
         verify(mockRepository, times(1)).findById(1);
         verify(mockRepository, times(1)).save(any(User.class));
+
+    }
+
+    @Test
+    public void updateUserTestConflictException() throws Exception {
+        UserDto newUser = new UserDto(1, "Name", "email@email.com");
+        when(mockRepository.findById(1)).thenReturn(Optional.of(UserMapper.toUser(newUser)));
+
+        when(mockRepository.save(any(User.class))).thenThrow(DataIntegrityViolationException.class);
+        String patchInJson = "{\"email\":\"email@email.come\"}";
+
+        mockMvc.perform(patch("/users/1")
+                        .content(patchInJson)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+
+//        verify(mockRepository, times(1)).findById(1);
+//        verify(mockRepository, times(1)).save(any(User.class));
 
     }
 

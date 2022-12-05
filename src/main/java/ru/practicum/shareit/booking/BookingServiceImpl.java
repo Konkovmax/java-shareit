@@ -69,7 +69,8 @@ public class BookingServiceImpl implements BookingService {
                             "User with id: %s not found", userId));
                 });
         return bookingRepository.getBookingByBooker_Id(userId,
-                        PageRequest.of(setPage(from, size), size, Sort.by("start").descending())).stream()
+                        PageRequest.of((size > from) ? 0 : from / size, size, Sort.by("start").descending()))
+                .stream()
                 .filter(bookingStatus(stateIncome))
                 .map(BookingMapper::toBookingDto)
                 //.sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
@@ -85,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException(String.format(
                         "User with id: %s not found", userId)));
         return bookingRepository.getBookingByOwner_Id(userId,
-                        PageRequest.of(setPage(from, size), size, Sort.by("start").descending())).stream()
+                        PageRequest.of((size > from) ? 0 : from / size, size, Sort.by("start").descending())).stream()
                 .filter(bookingStatus(stateIncome))
                 .map(BookingMapper::toBookingDto)
                 // .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
@@ -143,7 +144,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private Predicate<Booking> bookingStatus(String stateIncome) {
+    public Predicate<Booking> bookingStatus(String stateIncome) {
         State state;
         try {
             state = State.valueOf(stateIncome);
@@ -180,9 +181,5 @@ public class BookingServiceImpl implements BookingService {
             }
         }
         return bookingStatus;
-    }
-
-    private int setPage(int from, int size) {
-        return (size > from) ? 0 : from / size;
     }
 }

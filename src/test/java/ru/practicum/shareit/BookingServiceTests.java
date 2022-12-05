@@ -3,14 +3,25 @@ package ru.practicum.shareit;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingServiceImpl;
+import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.dto.BookingDateDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingIncomeDto;
 import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -22,6 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class BookingServiceTests {
     private final BookingServiceImpl bookingService;
 
+    @Mock
+    private Booking mockBooking;
+
     @Test
     public void testBookingValidation() {
         BadRequestException ex = assertThrows(
@@ -32,6 +46,35 @@ class BookingServiceTests {
                     bookingService.throwIfNotValid(booking);
                 });
         Assertions.assertEquals("Booking start can't be in the past", ex.getMessage());
+    }
+
+    @Test
+    public void bookingStatusTest() {
+        List<Booking> newBooking = Arrays.asList(
+                new Booking(1, LocalDateTime.now(), LocalDateTime.now().minusDays(2),
+                        null, null, Status.WAITING),
+                new Booking(2, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3),
+                        null, null, Status.WAITING));
+        Predicate<Booking> status = bookingService.bookingStatus("FUTURE");
+//            when(mockBooking.getStart().isAfter(LocalDateTime.now())).thenReturn(x -> x.getStart().isAfter(LocalDateTime.now()));
+//            when(mockDTO.isCompleted()).thenReturn(false);
+        List<Booking> filterBooking =newBooking.stream()
+                .filter(status)
+                .collect(Collectors.toList());
+//            Predicate<Booking> expected = x -> x.getStart().isAfter(LocalDateTime.now());
+//            boolean actual = isDone.test(mockDTO);
+
+        Assertions.assertEquals(filterBooking.get(0).getId(), 2);
+    }
+
+    @Test
+    public void BookingMapperTest(){
+        User newUser = new User(1, "Name", "email@email.com");
+                Booking Booking = new Booking(1, null, null,
+                null, newUser, Status.WAITING);
+        BookingDateDto expectedBooking = new BookingDateDto(1, null, null,
+                null, 1, Status.WAITING);
+        Assertions.assertEquals(expectedBooking,BookingMapper.toBookingDateDto(Booking));
     }
 //    BadRequestException ex1 = assertThrows(
 //                BadRequestException.class,

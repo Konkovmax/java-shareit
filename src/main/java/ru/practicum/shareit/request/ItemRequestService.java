@@ -45,9 +45,7 @@ public class ItemRequestService {
             throw new BadRequestException("Incorrect pagination parameters");
         }
         return requestRepository.findItemRequestByRequester_IdNot(userId,
-                        //тут я что-то засомневался, толи тренарник прямо так запихивать, или лучше как в букингсервис -
-                        // в отдельный метод?
-                        PageRequest.of((size > from) ? 0 : from / size, size, Sort.by("created").descending())).stream()
+                         PageRequest.of((size > from) ? 0 : from / size, size, Sort.by("created").descending())).stream()
                 .map(ItemRequestMapper::toItemRequestDto)
                 .peek(x -> x.setItems(itemRepository.getItemByRequest_Id(x.getId()).stream()
                         .map(ItemMapper::toItemDto)

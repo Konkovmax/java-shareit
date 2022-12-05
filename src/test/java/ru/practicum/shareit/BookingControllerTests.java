@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,6 +19,7 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.dto.BookingDateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
@@ -23,8 +27,11 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -61,7 +68,7 @@ public class BookingControllerTests {
 //        }
 
     @Test
-    public void getBookingTest() throws Exception {
+    public void getBookingTestOK() throws Exception {
         User newUser = new User(1, "Name", "email@email.com");
         Item newItem = new Item(1, "Name", "Description", true, newUser, null);
 
@@ -82,64 +89,89 @@ public class BookingControllerTests {
 
     }
 
-//    @Test
-//    public void getAllItemsTest() throws Exception {
+    @Test
+    public void getBookingTestNotFound() throws Exception {
+
+            mockMvc.perform(get("/bookings/5")
+                        .header("X-Sharer-User-Id", 1))
+                    .andExpect(status().isNotFound());
+        }
 //        User newUser = new User(1, "Name", "email@email.com");
 //        Item newItem = new Item(1, "Name", "Description", true, newUser, null);
 //
-//        List<Booking> newBooking = Arrays.asList(
-//                new Booking(1, LocalDateTime.now(),LocalDateTime.now().plusDays(2),
-//                newItem,newUser, Status.WAITING),
-//                new Booking(2, LocalDateTime.now().plusDays(1),LocalDateTime.now().plusDays(3),
-//                newItem,newUser, Status.WAITING));
+//        BookingDto newBooking = new BookingDto(1, LocalDateTime.now(), LocalDateTime.now().plusDays(2),
+//                newItem, newUser, Status.WAITING);
+//        when(mockRepository.findById(1)).thenReturn(Optional.of(BookingMapper.toBooking(newBooking)));
+//        when(mockItemRepository.findById(1)).thenReturn(Optional.of(newItem));
 //
-//        when(mockRepository.getBookingByBooker_Id(1, PageRequest.of(0,10)))
-//                .thenReturn(new PageImpl<>(newBooking));
-//                when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(newUser));
-//
-//        mockMvc.perform(get("/bookings")
-//                        .header("X-Sharer-User-Id",1))
+//        mockMvc.perform(get("/bookings/1")
+//                // .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 //                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$", hasSize(2)))
-//                .andExpect(jsonPath("$[0].id", is(1)))
-//                .andExpect(jsonPath("$[0].name", is("Name")))
-//                .andExpect(jsonPath("$[0].description", is("Description")))
-//                .andExpect(jsonPath("$[0].available", is(true)))
-//                  .andExpect(jsonPath("$[1].id", is(2)))
-//                .andExpect(jsonPath("$[1].name", is("2Name")))
-//                .andExpect(jsonPath("$[1].description", is("2Description")))
-//                .andExpect(jsonPath("$[1].available", is(true)));
+//                .andExpect(jsonPath("$.id", is(1)))
+////                .andExpect(jsonPath("$.owner", is(newUser)))
+//                .andExpect(jsonPath("$.status", is("WAITING")));
 //
-//        verify(mockRepository, times(1))
-//                .getBookingByBooker_Id(1, PageRequest.of(0,10));
+//        verify(mockRepository, times(1)).findById(1);
+//
 //    }
 
-//    @Test
-//    public void searchItemsTest() throws Exception {
-//
-//        List<Item> items = Arrays.asList(
-//                 new Item(1, "Name", "Description", true,null,null),
-//                 new Item(2, "Drill Bosch", "Professional", true,null,null));
-//String query = "Bosch";
-//        when(mockRepository.search(query, PageRequest.of(0,10))).thenReturn(new PageImpl<>(items));
-//
-//        mockMvc.perform(get("/items/search")
-//                                .param("text", query)
-////                        .header("X-Sharer-User-Id",1)
-//                        )
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$", hasSize(2)))
-//                .andExpect(jsonPath("$[0].id", is(1)))
-//                .andExpect(jsonPath("$[0].name", is("Drill Bosch")))
-//                .andExpect(jsonPath("$[0].description", is("Professional")))
-//                .andExpect(jsonPath("$[0].available", is(true)))
-////                  .andExpect(jsonPath("$[1].id", is(2)))
-////                .andExpect(jsonPath("$[1].name", is("2Name")))
-////                .andExpect(jsonPath("$[1].description", is("2Description")))
-////                .andExpect(jsonPath("$[1].available", is(true)));
-//;
-//        verify(mockRepository, times(1)).search(query, PageRequest.of(0,10));
-//    }
+
+    @Test
+    public void getAllBookingsForUserTest() throws Exception {
+        User newUser = new User(1, "Name", "email@email.com");
+        Item newItem = new Item(1, "Name", "Description", true, newUser, null);
+
+        List<Booking> newBooking = Arrays.asList(
+                new Booking(1, LocalDateTime.now(), LocalDateTime.now().plusDays(2),
+                        newItem, newUser, Status.WAITING),
+                new Booking(2, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3),
+                        newItem, newUser, Status.WAITING));
+
+        when(mockRepository.getBookingByBooker_Id(1, PageRequest.of(0, 10,
+                Sort.by("start").descending())))
+                .thenReturn(new PageImpl<>(newBooking));
+        when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(newUser));
+
+        mockMvc.perform(get("/bookings")
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].status", is("WAITING")))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[0].status", is("WAITING")));
+        verify(mockRepository, times(1))
+                .getBookingByBooker_Id(1, PageRequest.of(0, 10,
+                        Sort.by("start").descending()));
+    }
+    @Test
+    public void getAllBookingsForOwnerTest() throws Exception {
+        User newUser = new User(1, "Name", "email@email.com");
+        Item newItem = new Item(1, "Name", "Description", true, newUser, null);
+
+        List<Booking> newBooking = Arrays.asList(
+                new Booking(1, LocalDateTime.now(), LocalDateTime.now().plusDays(2),
+                        newItem, newUser, Status.WAITING),
+                new Booking(2, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(3),
+                        newItem, newUser, Status.WAITING));
+
+        when(mockRepository.getBookingByOwner_Id(1, PageRequest.of(0, 10,
+                Sort.by("start").descending())))
+                .thenReturn(new PageImpl<>(newBooking));
+        when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(newUser));
+
+        mockMvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].status", is("WAITING")))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[0].status", is("WAITING")));
+        verify(mockRepository, times(1))
+                .getBookingByOwner_Id(1, PageRequest.of(0, 10,
+                        Sort.by("start").descending()));
+    }
 
     @Test
     public void updateBookingTest() throws Exception {
