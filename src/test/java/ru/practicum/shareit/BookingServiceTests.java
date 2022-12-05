@@ -58,7 +58,7 @@ class BookingServiceTests {
         Predicate<Booking> status = bookingService.bookingStatus("FUTURE");
 //            when(mockBooking.getStart().isAfter(LocalDateTime.now())).thenReturn(x -> x.getStart().isAfter(LocalDateTime.now()));
 //            when(mockDTO.isCompleted()).thenReturn(false);
-        List<Booking> filterBooking =newBooking.stream()
+        List<Booking> filterBooking = newBooking.stream()
                 .filter(status)
                 .collect(Collectors.toList());
 //            Predicate<Booking> expected = x -> x.getStart().isAfter(LocalDateTime.now());
@@ -68,13 +68,13 @@ class BookingServiceTests {
     }
 
     @Test
-    public void BookingMapperTest(){
+    public void bookingMapperTest() {
         User newUser = new User(1, "Name", "email@email.com");
-                Booking Booking = new Booking(1, null, null,
+                Booking booking = new Booking(1, null, null,
                 null, newUser, Status.WAITING);
         BookingDateDto expectedBooking = new BookingDateDto(1, null, null,
                 null, 1, Status.WAITING);
-        Assertions.assertEquals(expectedBooking,BookingMapper.toBookingDateDto(Booking));
+        Assertions.assertEquals(expectedBooking,BookingMapper.toBookingDateDto(booking));
     }
 //    BadRequestException ex1 = assertThrows(
 //                BadRequestException.class,

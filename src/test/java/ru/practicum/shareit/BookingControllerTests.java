@@ -144,6 +144,7 @@ public class BookingControllerTests {
                 .getBookingByBooker_Id(1, PageRequest.of(0, 10,
                         Sort.by("start").descending()));
     }
+
     @Test
     public void getAllBookingsForOwnerTest() throws Exception {
         User newUser = new User(1, "Name", "email@email.com");
