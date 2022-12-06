@@ -10,7 +10,6 @@ public class ItemRequestMapper {
                 request.getRequester(),
                 request.getCreated(),
                 null
-//                request.getItem()
         );
     }
 
@@ -20,7 +19,6 @@ public class ItemRequestMapper {
                 request.getDescription(),
                 request.getRequester(),
                 request.getCreated()
-                // request.getItem()
         );
     }
 }

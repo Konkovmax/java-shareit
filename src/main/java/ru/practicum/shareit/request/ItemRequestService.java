@@ -15,7 +15,7 @@ import ru.practicum.shareit.user.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
+//наверное лучше тут сразу пометить, что по срокам ужас как всё горело, хотя это и так будет очевидно
 @Service
 @Slf4j
 public class ItemRequestService {
@@ -45,7 +45,7 @@ public class ItemRequestService {
             throw new BadRequestException("Incorrect pagination parameters");
         }
         return requestRepository.findItemRequestByRequester_IdNot(userId,
-                         PageRequest.of((size > from) ? 0 : from / size, size, Sort.by("created").descending())).stream()
+                        PageRequest.of((size > from) ? 0 : from / size, size, Sort.by("created").descending())).stream()
                 .map(ItemRequestMapper::toItemRequestDto)
                 .peek(x -> x.setItems(itemRepository.getItemByRequest_Id(x.getId()).stream()
                         .map(ItemMapper::toItemDto)

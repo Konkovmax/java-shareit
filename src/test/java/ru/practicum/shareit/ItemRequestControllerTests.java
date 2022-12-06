@@ -40,10 +40,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class ItemRequestControllerTests {
 
-    private static final ObjectMapper om = //new ObjectMapper();
-            JsonMapper.builder()
-                    .addModule(new JavaTimeModule())
-                    .build();
+    private static final ObjectMapper om = JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .build();
 
     @Autowired
     private MockMvc mockMvc;
@@ -54,19 +53,6 @@ public class ItemRequestControllerTests {
     @MockBean
     private UserRepository mockUserRepository;
 
-//    @MockBean
-//    private CommentRepository mockCommentRepository;
-//
-//    @MockBean
-//    private BookingRepository mockBookingRepository;
-//        @BeforeAll
-//        public static void init() {
-////            Book book = new Book(1L, "Book Name", "Mkyong", new BigDecimal("9.99"));
-////            when(mockRepository.findById(1L)).thenReturn(Optional.of(book));
-//            ItemDto newItem = new ItemDto(1, "Name", "email@email.com");
-//            when(mockRepository.findById(1)).thenReturn(Optional.of(ItemMapper.toItem(newItem)));
-//        }
-
     @Test
     public void getItemRequestTest() throws Exception {
         User newUser = new User(1, "Name", "email@email.com");
@@ -76,7 +62,6 @@ public class ItemRequestControllerTests {
         when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(newUser));
         mockMvc.perform(get("/requests/1")
                         .header("X-Sharer-User-Id", 1))
-                // .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.description", is("Description")));
@@ -135,21 +120,15 @@ public class ItemRequestControllerTests {
         User newUser = new User(1, "Name", "email@email.com");
         ItemRequestDto newItemRequest = new ItemRequestDto(1, "Description", newUser, LocalDateTime.now(),
                 null);
-//        ItemDto newItem = new ItemDto(1, "Name", "Description", true,null,0,
-//                null,null,null);
         when(mockRepository.save(any(ItemRequest.class))).thenReturn(ItemRequestMapper
                 .toItemRequest(newItemRequest));
         when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(newUser));
 
         mockMvc.perform(post("/requests")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(om.writeValueAsString(newItemRequest))
-//                        .contentType(MediaType.APPLICATION_JSON)
-                                .header("X-Sharer-User-Id", 1)
-//                , "text",
-//                                "Content-Type", "application/json", "text",
-//                                "Accept", "*/*", "text")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(newItemRequest))
+                        .header("X-Sharer-User-Id", 1)
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))

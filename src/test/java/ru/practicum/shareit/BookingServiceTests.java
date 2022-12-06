@@ -25,8 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-//@Sql("/testschema.sql")
-//@Sql("/testdata.sql")
 class BookingServiceTests {
     private final BookingServiceImpl bookingService;
 
@@ -58,7 +56,7 @@ class BookingServiceTests {
     public void testIncorrectPagination() {
         BadRequestException ex = assertThrows(
                 BadRequestException.class,
-                () -> bookingService.getAllForUser(1, -2,-1,"PAST"));
+                () -> bookingService.getAllForUser(1, -2, -1, "PAST"));
         Assertions.assertEquals("Incorrect pagination parameters", ex.getMessage());
     }
 
@@ -156,69 +154,4 @@ class BookingServiceTests {
                 null, 1, Status.WAITING);
         Assertions.assertEquals(expectedBooking, BookingMapper.toBookingDateDto(booking));
     }
-//    BadRequestException ex1 = assertThrows(
-//                BadRequestException.class,
-//                () -> {
-//        BookingIncomeDto booking = new BookingIncomeDto(LocalDateTime.now(),LocalDateTime.now().minusDays(1),1);
-//        bookingService.throwIfNotValid(booking);
-//                });
-//        Assertions.assertEquals("Booking ending can't be in the past", ex1.getMessage());
-//    }
-
-//    @Test
-//    public void testFindAllUsers() {
-//        List<User> allUsers = userStorage.findAll();
-//        assertEquals(3, allUsers.size());
-//    }
-//
-//    @Test
-//    public void testCreateUser() {
-//        int userId = 4;
-//
-//        User user = new User(userId, "Name", "login", "1989-02-01", "email@email.ru");
-//        userStorage.create(user);
-//        User savedUser = userStorage.getUser(userId).get();
-//        savedUser.setId(userId);
-//        assertEquals(user, savedUser, "Users not equal");
-//    }
-//
-//    @Test
-//    public void testUpdateUser() {
-//        int userId = 3;
-//
-//        User user = new User(userId, "Name", "login", "1989-02-01", "email@email.ru");
-//        userStorage.update(user);
-//        User savedUser = userStorage.getUser(userId).get();
-//        savedUser.setId(userId);
-//        assertEquals(user, savedUser, "Users not equal");
-//    }
-//
-//    @Test
-//    public void testUserExistCheck() {
-//        assertEquals(0, userStorage.userExistCheck(5));
-//    }
-//
-//    @Test
-//    public void testCommonFriends() {
-//        List<User> commonFriends = userStorage.getCommonFriends(1, 2);
-//        assertEquals("Ivan", commonFriends.get(0).getName());
-//    }
-//
-//    @Test
-//    public void testGetFriends() {
-//        List<User> friends = userStorage.getFriends(1);
-//        assertEquals(2, friends.size());
-//    }
-//
-//    @Test
-//    public void testAddFriend() {
-//        userStorage.addFriend(3, 1);
-//        assertEquals("Mario", userStorage.getFriends(3).get(0).getName());
-//    }
-//
-//    @Test
-//    public void testRemoveFriends() {
-//        userStorage.removeFriend(1, 2);
-//        assertEquals(1, userStorage.getFriends(1).size());
-//    }
 }

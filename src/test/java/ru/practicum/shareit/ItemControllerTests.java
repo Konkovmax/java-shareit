@@ -46,10 +46,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class ItemControllerTests {
 
-    private static final ObjectMapper om = //new ObjectMapper();
-            JsonMapper.builder()
-                    .addModule(new JavaTimeModule())
-                    .build();
+    private static final ObjectMapper om = JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .build();
 
     @Autowired
     private MockMvc mockMvc;
@@ -68,13 +67,6 @@ public class ItemControllerTests {
 
     @MockBean
     private BookingRepository mockBookingRepository;
-//        @BeforeAll
-//        public static void init() {
-////            Book book = new Book(1L, "Book Name", "Mkyong", new BigDecimal("9.99"));
-////            when(mockRepository.findById(1L)).thenReturn(Optional.of(book));
-//            ItemDto newItem = new ItemDto(1, "Name", "email@email.com");
-//            when(mockRepository.findById(1)).thenReturn(Optional.of(ItemMapper.toItem(newItem)));
-//        }
 
     @Test
     public void getItemTest() throws Exception {
@@ -84,7 +76,6 @@ public class ItemControllerTests {
 
         mockMvc.perform(get("/items/1")
                         .header("X-Sharer-User-Id", 1))
-                // .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.name", is("Name")))
@@ -120,34 +111,7 @@ public class ItemControllerTests {
         verify(mockRepository, times(1)).getItemByOwner_Id(1, PageRequest.of(0, 10));
     }
 
-//    @Test
-//    public void searchItemsTest() throws Exception {
-//
-//        List<Item> items = Arrays.asList(
-//                new Item(1, "Name", "Description", true, null, null),
-//                new Item(2, "Drill Bosch", "Professional", true, null, null));
-//        String query = "Bosch";
-//        when(mockRepository.search(query, PageRequest.of(0, 10))).thenReturn(new PageImpl<>(items));
-//
-//        mockMvc.perform(get("/items/search")
-//                                .param("text", query)
-////                        .header("X-Sharer-User-Id",1)
-//                )
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$", hasSize(2)))
-//                .andExpect(jsonPath("$[0].id", is(1)))
-//                .andExpect(jsonPath("$[0].name", is("Drill Bosch")))
-//                .andExpect(jsonPath("$[0].description", is("Professional")))
-//                .andExpect(jsonPath("$[0].available", is(true)))
-////                  .andExpect(jsonPath("$[1].id", is(2)))
-////                .andExpect(jsonPath("$[1].name", is("2Name")))
-////                .andExpect(jsonPath("$[1].description", is("2Description")))
-////                .andExpect(jsonPath("$[1].available", is(true)));
-//        ;
-//        verify(mockRepository, times(1)).search(query, PageRequest.of(0, 10));
-//    }
-
- @Test
+    @Test
     public void searchItemsTestEmpty() throws Exception {
 
         List<Item> items = Arrays.asList(
@@ -157,17 +121,10 @@ public class ItemControllerTests {
         when(mockRepository.search(query, PageRequest.of(0, 10))).thenReturn(new PageImpl<>(items));
 
         mockMvc.perform(get("/items/search")
-                                .param("text", query)
-//                        .header("X-Sharer-User-Id",1)
+                        .param("text", query)
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)))
-
-//                  .andExpect(jsonPath("$[1].id", is(2)))
-//                .andExpect(jsonPath("$[1].name", is("2Name")))
-//                .andExpect(jsonPath("$[1].description", is("2Description")))
-//                .andExpect(jsonPath("$[1].available", is(true)));
-        ;
+                .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test
@@ -220,10 +177,10 @@ public class ItemControllerTests {
         when(mockRepository.save(any(Item.class))).thenReturn(ItemMapper.toItem(newItem, null));
         when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(newUser));
         mockMvc.perform(post("/items")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(om.writeValueAsString(newItem))
-                                .header("X-Sharer-User-Id", 1))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(newItem))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.name", is("Name")))
@@ -235,17 +192,16 @@ public class ItemControllerTests {
     @Test
     public void itemCreateTestRequestNotFound() throws Exception {
         User newUser = new User(1, "Name", "email@email.com");
-//        ItemRequest itemRequest = new ItemRequest(2, "Description", newUser, LocalDateTime.now());
         ItemDto newItem = new ItemDto(1, "Name", "Description", true, null, 1,
                 null, null, null);
         when(mockRepository.save(any(Item.class))).thenReturn(ItemMapper.toItem(newItem, null));
         when(mockRequestRepository.findById(anyInt())).thenReturn(Optional.ofNullable(null));
         when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(newUser));
         mockMvc.perform(post("/items")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(om.writeValueAsString(newItem))
-                                .header("X-Sharer-User-Id", 1))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(newItem))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isNotFound());
     }
 
@@ -265,10 +221,10 @@ public class ItemControllerTests {
         when(mockRepository.findById(anyInt())).thenReturn(Optional.of(newItem));
         when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(newUser));
         mockMvc.perform(post("/items/1/comment")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(om.writeValueAsString(newComment))
-                                .header("X-Sharer-User-Id", 1))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(newComment))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.text", is("Text")));
@@ -279,11 +235,6 @@ public class ItemControllerTests {
     public void commentCreateTestWrongUser() throws Exception {
         User newUser = new User(1, "Name", "email@email.com");
         Item newItem = new Item(1, "Name", "Description", true, newUser, null);
-//        List<Booking> booking = Arrays.asList(
-//                new Booking(1, LocalDateTime.now().minusDays(5), LocalDateTime.now().minusDays(1),
-//                        newItem, newUser, Status.APPROVED),
-//                new Booking(2, LocalDateTime.now().minusDays(7), LocalDateTime.now().minusDays(4),
-//                        newItem, newUser, Status.APPROVED));
         Comment newComment = new Comment(1, "Text", newItem, newUser, LocalDateTime.now());
         when(mockCommentRepository.save(any(Comment.class))).thenReturn(newComment);
         when(mockBookingRepository.getBookingsByItem_IdAndBooker_IdAndStatus_ApprovedIs(anyInt(),
@@ -291,10 +242,10 @@ public class ItemControllerTests {
         when(mockRepository.findById(anyInt())).thenReturn(Optional.of(newItem));
         when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(newUser));
         mockMvc.perform(post("/items/1/comment")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(om.writeValueAsString(newComment))
-                                .header("X-Sharer-User-Id", 1))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(newComment))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isBadRequest());
     }
 

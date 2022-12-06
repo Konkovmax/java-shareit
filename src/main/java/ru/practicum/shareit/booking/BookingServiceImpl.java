@@ -73,7 +73,6 @@ public class BookingServiceImpl implements BookingService {
                 .stream()
                 .filter(bookingStatus(stateIncome))
                 .map(BookingMapper::toBookingDto)
-                //.sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
                 .collect(Collectors.toList());
     }
 
@@ -89,7 +88,6 @@ public class BookingServiceImpl implements BookingService {
                         PageRequest.of((size > from) ? 0 : from / size, size, Sort.by("start").descending())).stream()
                 .filter(bookingStatus(stateIncome))
                 .map(BookingMapper::toBookingDto)
-                // .sorted((x1, x2) -> x2.getStart().compareTo(x1.getStart()))
                 .collect(Collectors.toList());
     }
 

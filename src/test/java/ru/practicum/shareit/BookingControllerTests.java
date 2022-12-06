@@ -43,10 +43,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class BookingControllerTests {
 
-    private static final ObjectMapper om = //new ObjectMapper();
-            JsonMapper.builder()
-                    .addModule(new JavaTimeModule())
-                    .build();
+    private static final ObjectMapper om = JsonMapper.builder()
+            .addModule(new JavaTimeModule())
+            .build();
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,10 +71,8 @@ public class BookingControllerTests {
 
         mockMvc.perform(get("/bookings/1")
                         .header("X-Sharer-User-Id", 1))
-                // .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
-//                .andExpect(jsonPath("$.owner", is(newUser)))
                 .andExpect(jsonPath("$.status", is("WAITING")));
 
         verify(mockRepository, times(1)).findById(1);
@@ -85,10 +82,10 @@ public class BookingControllerTests {
     @Test
     public void getBookingTestNotFound() throws Exception {
 
-            mockMvc.perform(get("/bookings/5")
+        mockMvc.perform(get("/bookings/5")
                         .header("X-Sharer-User-Id", 1))
-                    .andExpect(status().isNotFound());
-        }
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     public void getBookingTestUserMismatched() throws Exception {
@@ -102,8 +99,8 @@ public class BookingControllerTests {
 
         mockMvc.perform(get("/bookings/1")
                         .header("X-Sharer-User-Id", 2))
-                    .andExpect(status().isNotFound());
-        }
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     public void getAllBookingsForUserTest() throws Exception {
@@ -182,7 +179,7 @@ public class BookingControllerTests {
         verify(mockRepository, times(1)).save(any(Booking.class));
     }
 
- @Test
+    @Test
     public void updateBookingRejectedTestOK() throws Exception {
         User newUser = new User(1, "Name", "email@email.com");
         Item newItem = new Item(1, "Name", "Description", true, newUser, null);
@@ -242,10 +239,10 @@ public class BookingControllerTests {
         when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(newUser));
         when(mockItemRepository.findById(anyInt())).thenReturn(Optional.of(newItem));
         mockMvc.perform(post("/bookings")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(om.writeValueAsString(newBooking))
-                                .header("X-Sharer-User-Id", 1))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(newBooking))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.status", is("WAITING")));
@@ -260,10 +257,10 @@ public class BookingControllerTests {
                 newItem, null, Status.WAITING);
         when(mockItemRepository.findById(anyInt())).thenReturn(Optional.of(newItem));
         mockMvc.perform(post("/bookings")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(om.writeValueAsString(newBooking))
-                                .header("X-Sharer-User-Id", 1))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(newBooking))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isBadRequest());
     }
 
@@ -277,10 +274,10 @@ public class BookingControllerTests {
         when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(newUser));
         when(mockItemRepository.findById(anyInt())).thenReturn(Optional.of(newItem));
         mockMvc.perform(post("/bookings")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .content(om.writeValueAsString(newBooking))
-                                .header("X-Sharer-User-Id", 1))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(newBooking))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isNotFound());
     }
 

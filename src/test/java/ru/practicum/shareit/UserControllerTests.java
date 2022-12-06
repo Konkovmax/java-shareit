@@ -41,40 +41,25 @@ public class UserControllerTests {
     @MockBean
     private UserRepository mockRepository;
 
-//        @BeforeAll
-//        public static void init() {
-////            Book book = new Book(1L, "Book Name", "Mkyong", new BigDecimal("9.99"));
-////            when(mockRepository.findById(1L)).thenReturn(Optional.of(book));
-//            UserDto newUser = new UserDto(1, "Name", "email@email.com");
-//            when(mockRepository.findById(1)).thenReturn(Optional.of(UserMapper.toUser(newUser)));
-//        }
-
     @Test
     public void getUserTest() throws Exception {
         UserDto newUser = new UserDto(1, "Name", "email@email.com");
         when(mockRepository.findById(1)).thenReturn(Optional.of(UserMapper.toUser(newUser)));
 
         mockMvc.perform(get("/users/1"))
-                /*.andDo(print())*/
-                // .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.name", is("Name")))
                 .andExpect(jsonPath("$.email", is("email@email.com")));
-
         verify(mockRepository, times(2)).findById(1);
-
     }
 
     @Test
     public void getAllUsersTest() throws Exception {
-
         List<User> users = Arrays.asList(
                 new User(1, "Name", "email@email.com"),
                 new User(2, "Name2", "email2@email.com"));
-
         when(mockRepository.findAll()).thenReturn(users);
-
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -84,7 +69,6 @@ public class UserControllerTests {
                 .andExpect(jsonPath("$[1].id", is(2)))
                 .andExpect(jsonPath("$[1].name", is("Name2")))
                 .andExpect(jsonPath("$[1].email", is("email2@email.com")));
-
         verify(mockRepository, times(1)).findAll();
     }
 
@@ -118,10 +102,6 @@ public class UserControllerTests {
                         .content(patchInJson)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict());
-
-//        verify(mockRepository, times(1)).findById(1);
-//        verify(mockRepository, times(1)).save(any(User.class));
-
     }
 
     @Test
