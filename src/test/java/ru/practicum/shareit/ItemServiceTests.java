@@ -1,100 +1,83 @@
 package ru.practicum.shareit;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import ru.practicum.shareit.item.model.Item;
 
-@SpringBootTest
+import javax.persistence.TypedQuery;
+
+//@SpringBootTest
+    @DataJpaTest
+//    @RunWith(SpringRunner.class)
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-//@Sql("/testschema.sql")
-//@Sql("/testdata.sql")
+           // @Import(JpaConfig.class)
+
 class ItemServiceTests {
-//    private final ItemServiceImpl itemService;
-//    @BeforeAll
-//    public void prepareUser(){
-//        UserDto user = new UserDto(1, "Ivanov", "ivan@ivan.iv");
-//        userService.create(user);
-//
-//    }
 
 
-//    @Test
-//    public void testItemUpdate() {
-//        Optional<User> userOptional = userStorage.getUser(1);
-//        assertThat(userOptional)
-//                .isPresent()
-//                .hasValueSatisfying(user ->
-//                        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
-//                );
-//    }
+        @Autowired
+        private TestEntityManager em;
 
-//    @Test
-//    public void testFindAllUsers() {
-//        List<User> allUsers = userStorage.findAll();
-//        assertEquals(3, allUsers.size());
-//    }
+//        private final ItemServiceImpl itemService;
 
-//    @Test
-//    public void testCreateItem() {
-////        UserService mockUserService = Mockito.mock(UserService.class);
-////        //bookService.setAuthorService(mockAuthorService);
-////
-////        Mockito
-////                .when(mockAuthorService.getAuthorDescription(Mockito.anyInt()))
-////                .thenReturn("знаменитый русский писатель");
-////
-////        String bookDescription = bookService.createBookDescription("Война и мир", 1898, 5, "Л.Н.Толстой");
-////
-////        Assertions.assertEquals("Война и мир, 1898 автор Л.Н.Толстой, знаменитый русский писатель", bookDescription);
-//
-//        ItemDto item = new ItemDto();
-//        item.setName("Name");
-//        item.setDescription("Description");
-//        item.setAvailable(true);
-//        ItemDto savedItem = itemService.create(item, 1);
-//        //savedUser.setId(userId);
-//        assertEquals(item, savedItem, "Users not equal");
-//    }
+//        @Autowired
+//        private ItemRepository repository;
 
-//    @Test
-//    public void testUpdateUser() {
-//        int userId = 3;
+
+//        @Test
+//        public void contextLoads() {
+//            Assertions.assertNotNull(em);
+//        }
+
+        @Test
+        void searchTest() {
+           // List<Item> items = Arrays.asList(
+             Item item1 =  new Item();
+             item1.setName("Name");
+             item1.setDescription("Bosch");
+             item1.setAvailable(true);
+//                Item item2 = new Item(2, "Drill Bosch", "Professional", true, null, null);
+        String text = "Bosch";
+
+
+//        when(mockRepository.search(query, PageRequest.of(0, 10))).thenReturn(new PageImpl<>(items));
 //
-//        User user = new User(userId, "Name", "login", "1989-02-01", "email@email.ru");
-//        userStorage.update(user);
-//        User savedUser = userStorage.getUser(userId).get();
-//        savedUser.setId(userId);
-//        assertEquals(user, savedUser, "Users not equal");
-//    }
-//
-//    @Test
-//    public void testUserExistCheck() {
-//        assertEquals(0, userStorage.userExistCheck(5));
-//    }
-//
-//    @Test
-//    public void testCommonFriends() {
-//        List<User> commonFriends = userStorage.getCommonFriends(1, 2);
-//        assertEquals("Ivan", commonFriends.get(0).getName());
-//    }
-//
-//    @Test
-//    public void testGetFriends() {
-//        List<User> friends = userStorage.getFriends(1);
-//        assertEquals(2, friends.size());
-//    }
-//
-//    @Test
-//    public void testAddFriend() {
-//        userStorage.addFriend(3, 1);
-//        assertEquals("Mario", userStorage.getFriends(3).get(0).getName());
-//    }
-//
-//    @Test
-//    public void testRemoveFriends() {
-//        userStorage.removeFriend(1, 2);
-//        assertEquals(1, userStorage.getFriends(1).size());
-//    }
+//        mockMvc.perform(get("/items/search")
+//                                .param("text", query)
+////                        .header("X-Sharer-User-Id",1)
+//                )
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$", hasSize(2)))
+//                .andExpect(jsonPath("$[0].id", is(1)))
+//                .andExpect(jsonPath("$[0].name", is("Drill Bosch")))
+//                .andExpect(jsonPath("$[0].description", is("Professional")))
+//                .andExpect(jsonPath("$[0].available", is(true)))
+////                  .andExpect(jsonPath("$[1].id", is(2)))
+////                .andExpect(jsonPath("$[1].name", is("2Name")))
+////                .andExpect(jsonPath("$[1].description", is("2Description")))
+////                .andExpect(jsonPath("$[1].available", is(true)));
+//        ;
+//        verify(mockRepository, times(1)).search(query, PageRequest.of(0, 10));
+            //            Assertions.assertNull(emp.getEmployeeId());
+           // repository.save(item1);
+
+            em.persist(item1);
+//            em.persist(item2);
+
+            TypedQuery<Item> query = em.getEntityManager()
+                    .createQuery(" select i from Item i " +
+                            "where (upper(i.name) like upper(concat('%', :text, '%')) " +
+                            " or upper(i.description) like upper(concat('%', :text, '%')))" +
+                            "and i.available is true ", Item.class);
+            Item item = query.setParameter("text", text).getSingleResult();
+//            List<ItemDto> results = itemService.search(text, 0,10);
+           // List<Item> results = repository.search(text, PageRequest.of(0,10)).toList();
+            Assertions.assertEquals(item,item1);
+        }
 }

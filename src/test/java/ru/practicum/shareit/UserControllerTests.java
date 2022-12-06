@@ -144,6 +144,18 @@ public class UserControllerTests {
     }
 
     @Test
+    public void userCreateTestDuplicatedEmail() throws Exception {
+
+        UserDto newUser = new UserDto(1, "Name", "email@email.com");
+        when(mockRepository.save(any(User.class))).thenThrow(DataIntegrityViolationException.class);
+
+        mockMvc.perform(post("/users")
+                        .content(om.writeValueAsString(newUser))
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     public void deleteUserTest() throws Exception {
 
         doNothing().when(mockRepository).deleteById(1);

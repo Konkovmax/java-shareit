@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,8 +22,11 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -79,26 +85,49 @@ public class ItemRequestControllerTests {
 
     }
 
-//    @Test
-//    public void getAllRequestsTest() throws Exception {
-//
-//        List<ItemRequest> items = Arrays.asList(
-//                new ItemRequest(1, "Description", null, LocalDateTime.now()),
-//                new ItemRequest(2, "2Description", null, LocalDateTime.now()));
-//
-//        when(mockRepository.findItemRequestByRequester_IdNot(1, PageRequest.of(0, 10))).thenReturn(new PageImpl<>(items));
-//
-//        mockMvc.perform(get("/requests/all")
-//                        .header("X-Sharer-User-Id", 1))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$", hasSize(2)))
-//                .andExpect(jsonPath("$[0].id", is(1)))
-//                .andExpect(jsonPath("$[0].description", is("Description")))
-//                .andExpect(jsonPath("$[1].id", is(2)))
-//                .andExpect(jsonPath("$[1].description", is("2Description")));
-//
-//        verify(mockRepository, times(1)).findItemRequestByRequester_IdNot(1, PageRequest.of(0, 10));
-//    }
+    @Test
+    public void getAllRequestsTest() throws Exception {
+
+        List<ItemRequest> items = Arrays.asList(
+                new ItemRequest(1, "Description", null, LocalDateTime.now()),
+                new ItemRequest(2, "2Description", null, LocalDateTime.now()));
+
+        when(mockRepository.findItemRequestByRequester_IdNot(1, PageRequest.of(0, 10,
+                Sort.by("created").descending()))).thenReturn(new PageImpl<>(items));
+
+        mockMvc.perform(get("/requests/all")
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].description", is("Description")))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[1].description", is("2Description")));
+
+        verify(mockRepository, times(1)).findItemRequestByRequester_IdNot(1,
+                PageRequest.of(0, 10, Sort.by("created").descending()));
+    }
+
+    @Test
+    public void getAllOwnRequestsTest() throws Exception {
+
+        List<ItemRequest> items = Arrays.asList(
+                new ItemRequest(1, "Description", null, LocalDateTime.now()),
+                new ItemRequest(2, "2Description", null, LocalDateTime.now()));
+        when(mockUserRepository.findById(anyInt())).thenReturn(Optional.of(new User()));
+        when(mockRepository.getItemRequestByRequester_Id(1)).thenReturn(items);
+
+        mockMvc.perform(get("/requests")
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].description", is("Description")))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[1].description", is("2Description")));
+
+        verify(mockRepository, times(1)).getItemRequestByRequester_Id(1);
+    }
 
     @Test
     public void itemRequestCreateTest() throws Exception {
