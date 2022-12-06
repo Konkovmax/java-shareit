@@ -12,17 +12,17 @@ import ru.practicum.shareit.item.model.Item;
 import javax.persistence.TypedQuery;
 
 //@SpringBootTest
-    @DataJpaTest
+@DataJpaTest
 //    @RunWith(SpringRunner.class)
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-           // @Import(JpaConfig.class)
+        // @Import(JpaConfig.class)
 
 class ItemServiceTests {
 
 
-        @Autowired
-        private TestEntityManager em;
+    @Autowired
+    private TestEntityManager em;
 
 //        private final ItemServiceImpl itemService;
 
@@ -35,13 +35,13 @@ class ItemServiceTests {
 //            Assertions.assertNotNull(em);
 //        }
 
-        @Test
-        void searchTest() {
-           // List<Item> items = Arrays.asList(
-             Item item1 =  new Item();
-             item1.setName("Name");
-             item1.setDescription("Bosch");
-             item1.setAvailable(true);
+    @Test
+    void searchTest() {
+        // List<Item> items = Arrays.asList(
+        Item item1 = new Item();
+        item1.setName("Name");
+        item1.setDescription("Bosch");
+        item1.setAvailable(true);
 //                Item item2 = new Item(2, "Drill Bosch", "Professional", true, null, null);
         String text = "Bosch";
 
@@ -64,20 +64,20 @@ class ItemServiceTests {
 ////                .andExpect(jsonPath("$[1].available", is(true)));
 //        ;
 //        verify(mockRepository, times(1)).search(query, PageRequest.of(0, 10));
-            //            Assertions.assertNull(emp.getEmployeeId());
-           // repository.save(item1);
+        //            Assertions.assertNull(emp.getEmployeeId());
+        // repository.save(item1);
 
-            em.persist(item1);
+        em.persist(item1);
 //            em.persist(item2);
 
-            TypedQuery<Item> query = em.getEntityManager()
-                    .createQuery(" select i from Item i " +
-                            "where (upper(i.name) like upper(concat('%', :text, '%')) " +
-                            " or upper(i.description) like upper(concat('%', :text, '%')))" +
-                            "and i.available is true ", Item.class);
-            Item item = query.setParameter("text", text).getSingleResult();
+        TypedQuery<Item> query = em.getEntityManager()
+                .createQuery(" select i from Item i " +
+                        "where (upper(i.name) like upper(concat('%', :text, '%')) " +
+                        " or upper(i.description) like upper(concat('%', :text, '%')))" +
+                        "and i.available is true ", Item.class);
+        Item item = query.setParameter("text", text).getSingleResult();
 //            List<ItemDto> results = itemService.search(text, 0,10);
-           // List<Item> results = repository.search(text, PageRequest.of(0,10)).toList();
-            Assertions.assertEquals(item,item1);
-        }
+        // List<Item> results = repository.search(text, PageRequest.of(0,10)).toList();
+        Assertions.assertEquals(item, item1);
+    }
 }

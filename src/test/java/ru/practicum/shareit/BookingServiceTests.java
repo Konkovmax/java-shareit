@@ -53,6 +53,7 @@ class BookingServiceTests {
                 });
         Assertions.assertEquals("Booking ending can't be in the past", ex.getMessage());
     }
+
     @Test
     public void testIncorrectPagination() {
         BadRequestException ex = assertThrows(

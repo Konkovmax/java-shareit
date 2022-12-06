@@ -231,6 +231,7 @@ public class ItemControllerTests {
                 .andExpect(jsonPath("$.available", is(true)));
         verify(mockRepository, times(1)).save(any(Item.class));
     }
+
     @Test
     public void itemCreateTestRequestNotFound() throws Exception {
         User newUser = new User(1, "Name", "email@email.com");
