@@ -47,12 +47,10 @@ CREATE TABLE IF NOT EXISTS requests
     description  varchar(255)                            NOT NULL,
     requester_id bigint                                  NOT NULL,
     created      timestamp without time zone,
+    item_id      bigint,
     CONSTRAINT pk_request PRIMARY KEY (id)
 );
 
-ALTER TABLE requests
-    ADD CONSTRAINT fk_requests FOREIGN KEY (requester_id)
-        REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE items
     ADD CONSTRAINT fk_item FOREIGN KEY (owner_id)
@@ -60,11 +58,15 @@ ALTER TABLE items
 
 ALTER TABLE items
     ADD CONSTRAINT fk_item_request FOREIGN KEY (request_id)
+        REFERENCES requests (id) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE requests
+    ADD CONSTRAINT fk_request_user FOREIGN KEY (requester_id)
         REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE requests
-    ADD CONSTRAINT fk_request_item FOREIGN KEY (requester_id)
-        REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_request_item FOREIGN KEY (item_id)
+        REFERENCES items (id) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE bookings
     ADD CONSTRAINT fk_booking FOREIGN KEY (booker_id)

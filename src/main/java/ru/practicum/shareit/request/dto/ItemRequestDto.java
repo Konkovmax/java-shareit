@@ -1,12 +1,22 @@
 package ru.practicum.shareit.request.dto;
 
-import org.apache.catalina.User;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.User;
 
-import java.time.LocalDate;
+import javax.validation.constraints.NotEmpty;
+import java.time.LocalDateTime;
+import java.util.List;
 
+@AllArgsConstructor
+@Data
 public class ItemRequestDto {
     private int id;
+
+    @NotEmpty
     private String description;
-    private User requestor;
-    private LocalDate created;
+    private User requester;
+    private LocalDateTime created;
+    private List<ItemDto> items;
 }
