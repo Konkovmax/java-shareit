@@ -56,7 +56,7 @@ class BookingServiceTests {
     public void testIncorrectPagination() {
         BadRequestException ex = assertThrows(
                 BadRequestException.class,
-                () -> bookingService.getAllForUser(1, -2, -1, "PAST"));
+                () -> bookingService.getAllForOwner(1, -2, -1, "PAST"));
         Assertions.assertEquals("Incorrect pagination parameters", ex.getMessage());
     }
 

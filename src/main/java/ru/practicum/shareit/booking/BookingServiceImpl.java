@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -57,19 +58,15 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
-    public List<BookingDto> getAllForUser(int userId, int from, int size, String stateIncome) {
-        if (from < 0 || size < 1) {
-            log.warn("Incorrect pagination parameters");
-            throw new BadRequestException("Incorrect pagination parameters");
-        }
+    public List<BookingDto> getAllForUser(int userId, Pageable pageable, String stateIncome) {
+
         userRepository.findById(userId)
                 .orElseThrow(() -> {
-                    log.warn("user not found");
                     throw new NotFoundException(String.format(
                             "User with id: %s not found", userId));
                 });
         return bookingRepository.getBookingByBooker_Id(userId,
-                        PageRequest.of((size > from) ? 0 : from / size, size, Sort.by("start").descending()))
+                        pageable)
                 .stream()
                 .filter(bookingStatus(stateIncome))
                 .map(BookingMapper::toBookingDto)
@@ -93,13 +90,11 @@ public class BookingServiceImpl implements BookingService {
 
     public BookingDto update(int bookingId, int userId, boolean approved) {
         if (bookingRepository.findById(bookingId).orElseThrow().getItem().getOwner().getId() != userId) {
-            log.warn("user mismatched");
             throw new NotFoundException(String.format(
                     "User with id: %s does not own this item",
                     userId));
         }
         if (bookingRepository.findById(bookingId).orElseThrow().getStatus() == Status.APPROVED) {
-            log.warn("Booking already approved");
             throw new BadRequestException(String.format("Booking with id: %s already approved", bookingId));
         }
         Booking updateBooking = bookingRepository.findById(bookingId).orElseThrow();

@@ -12,13 +12,13 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     List<Booking> getBookingsByItem_IdOrderByStart(int itemId);
 
-    @Query(" select b from Booking b " +
-            "where b.item.id = ?1 and b.booker.id = ?2 and b.status = 'APPROVED' and b.end < ?3")
+    @Query(" SELECT b FROM Booking b " +
+            "WHERE b.item.id = ?1 AND b.booker.id = ?2 AND b.status = 'APPROVED' AND b.end < ?3")
     List<Booking> getBookingsByItem_IdAndBooker_IdAndStatus_ApprovedIs(int itemId, int bookerId, LocalDateTime now);
 
     Page<Booking> getBookingByBooker_Id(int userId, Pageable pageable);
 
-    @Query(" select b from Booking b " +
-            "where b.item.owner.id = ?1")
+    @Query(" SELECT b FROM Booking b " +
+            "WHERE b.item.owner.id = ?1")
     Page<Booking> getBookingByOwner_Id(int userId, Pageable pageable);
 }

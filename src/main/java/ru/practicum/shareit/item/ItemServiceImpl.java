@@ -49,8 +49,6 @@ public class ItemServiceImpl implements ItemService {
         if (item.getRequestId() != 0) {
             request = itemRequestRepository.findById(item.getRequestId())
                     .orElseThrow(() -> {
-                        log.warn(String.format(
-                                "Request with id: %s not found", item.getRequestId()));
                         throw new NotFoundException(String.format(
                                 "Request with id: %s not found", item.getRequestId()));
                     });
@@ -107,7 +105,6 @@ public class ItemServiceImpl implements ItemService {
 
     public ItemDto update(int id, ItemDto item, int userId) {
         if (itemRepository.findById(id).orElseThrow().getOwner().getId() != userId) {
-            log.warn("user mismatched");
             throw new NotFoundException(String.format(
                     "User with id: %s does not own this item",
                     userId));
