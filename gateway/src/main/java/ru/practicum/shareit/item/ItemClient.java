@@ -7,11 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.Map;
 
@@ -30,11 +28,11 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getAll(long userId, int from, int size) {
-            Map<String, Object> parameters = Map.of(
-                    "from", from,
-                    "size", size
-            );
-            return get("?from={from}&size={size}", userId, parameters);
+        Map<String, Object> parameters = Map.of(
+                "from", from,
+                "size", size
+        );
+        return get("?from={from}&size={size}", userId, parameters);
 
     }
 
@@ -56,7 +54,7 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getItem(int itemId, int userId) {
-        return get("/" + itemId,userId);
+        return get("/" + itemId, userId);
     }
 
     public ResponseEntity<Object> update(int id, ItemDto itemDto, int userId) {
@@ -64,6 +62,6 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> delete(int itemId) {
-         return delete("/" + itemId);
+        return delete("/" + itemId);
     }
 }

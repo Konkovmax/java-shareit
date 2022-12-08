@@ -1,16 +1,12 @@
 package ru.practicum.shareit.client;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+import java.util.Map;
 
 public class BaseClient {
     protected final RestTemplate rest;
@@ -30,8 +26,9 @@ public class BaseClient {
     protected ResponseEntity<Object> get(String path, Long userId, @Nullable Map<String, Object> parameters) {
         return makeAndSendRequest(HttpMethod.GET, path, userId, parameters, null);
     }
+
     protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
-        return makeAndSendRequest(HttpMethod.GET, path,null, parameters, null);
+        return makeAndSendRequest(HttpMethod.GET, path, null, parameters, null);
     }
 
     protected <T> ResponseEntity<Object> post(String path, T body) {
@@ -67,11 +64,11 @@ public class BaseClient {
     }
 
     protected <T> ResponseEntity<Object> patch(String path, Long userId, @Nullable Map<String, Object> parameters, T body) {
-        return makeAndSendRequest(HttpMethod.PATCH, path, userId, parameters,body);
+        return makeAndSendRequest(HttpMethod.PATCH, path, userId, parameters, body);
     }
 
     protected <T> ResponseEntity<Object> patch(String path, Long userId, @Nullable Map<String, Object> parameters) {
-        return makeAndSendRequest(HttpMethod.PATCH, path, userId, parameters,null);
+        return makeAndSendRequest(HttpMethod.PATCH, path, userId, parameters, null);
     }
 
     protected ResponseEntity<Object> delete(String path) {

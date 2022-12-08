@@ -8,7 +8,6 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @Controller
 @RequestMapping(path = "/items")
@@ -24,35 +23,35 @@ public class ItemController {
 
     @PostMapping("{itemId}/comment")
     public ResponseEntity<Object> createComment(@PathVariable("itemId") Integer itemId,
-                                    @RequestBody @Valid CommentDto commentDto,
-                                    @RequestHeader(value = "X-Sharer-User-Id") int userId) {
+                                                @RequestBody @Valid CommentDto commentDto,
+                                                @RequestHeader(value = "X-Sharer-User-Id") int userId) {
         return itemService.createComment(itemId, commentDto, userId);
     }
 
     @GetMapping
     public ResponseEntity<Object> getAll(@RequestHeader(value = "X-Sharer-User-Id") int userId,
-                                @RequestParam(value = "from", defaultValue = "0", required = false) int from,
-                                @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
+                                         @RequestParam(value = "from", defaultValue = "0", required = false) int from,
+                                         @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
         return itemService.getAll(userId, from, size);
     }
 
     @GetMapping("/search")
     public ResponseEntity<Object> search(@RequestParam(value = "text") String query,
-                                @RequestParam(value = "from", defaultValue = "0", required = false) int from,
-                                @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
+                                         @RequestParam(value = "from", defaultValue = "0", required = false) int from,
+                                         @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
         return itemService.search(query, from, size);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> get(@PathVariable("id") Integer itemId,
-                       @RequestHeader(value = "X-Sharer-User-Id") int userId) {
+                                      @RequestHeader(value = "X-Sharer-User-Id") int userId) {
         return itemService.getItem(itemId, userId);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Object> update(@PathVariable int id,
-                          @RequestBody ItemDto item,
-                          @RequestHeader(value = "X-Sharer-User-Id") int userId) {
+                                         @RequestBody ItemDto item,
+                                         @RequestHeader(value = "X-Sharer-User-Id") int userId) {
         return itemService.update(id, item, userId);
     }
 
