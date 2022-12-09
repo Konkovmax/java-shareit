@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -86,7 +87,8 @@ public class ItemServiceImpl implements ItemService {
             }
             return i;
         };
-        return itemRepository.getItemByOwner_Id(userId, PageRequest.of((size > from) ? 0 : from / size, size)).stream()
+        return itemRepository.getItemByOwner_Id(userId,
+                        PageRequest.of((size > from) ? 0 : from / size, size, Sort.by("id"))).stream()
                 .map(ItemMapper::toItemDto)
                 .map(addBooking)
                 .collect(Collectors.toList());

@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -93,7 +94,8 @@ public class ItemControllerTests {
                 new Item(1, "Name", "Description", true, null, null),
                 new Item(2, "2Name", "2Description", true, null, null));
 
-        when(mockRepository.getItemByOwner_Id(1, PageRequest.of(0, 10))).thenReturn(new PageImpl<>(items));
+        when(mockRepository.getItemByOwner_Id(1, PageRequest.of(0, 10, Sort.by("id"))))
+                .thenReturn(new PageImpl<>(items));
 
         mockMvc.perform(get("/items")
                         .header("X-Sharer-User-Id", 1))
@@ -108,7 +110,8 @@ public class ItemControllerTests {
                 .andExpect(jsonPath("$[1].description", is("2Description")))
                 .andExpect(jsonPath("$[1].available", is(true)));
 
-        verify(mockRepository, times(1)).getItemByOwner_Id(1, PageRequest.of(0, 10));
+        verify(mockRepository, times(1))
+                .getItemByOwner_Id(1, PageRequest.of(0, 10, Sort.by("id")));
     }
 
     @Test
