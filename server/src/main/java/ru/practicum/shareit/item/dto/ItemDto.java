@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDateDto;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserDto;
 
 import java.util.List;
 
