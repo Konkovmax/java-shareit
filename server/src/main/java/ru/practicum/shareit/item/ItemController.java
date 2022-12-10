@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -31,7 +33,8 @@ public class ItemController {
     public List<ItemDto> getAll(@RequestHeader(value = "X-Sharer-User-Id") int userId,
                                 @RequestParam(value = "from", defaultValue = "0", required = false) int from,
                                 @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
-        return itemService.getAll(userId, from, size);
+        return itemService.getAll(userId,
+                PageRequest.of((size > from) ? 0 : from / size, size, Sort.by("id")));
     }
 
     @GetMapping("/search")

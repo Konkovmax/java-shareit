@@ -8,6 +8,8 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 @Controller
 @RequestMapping(path = "/items")
@@ -30,15 +32,15 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<Object> getAll(@RequestHeader(value = "X-Sharer-User-Id") int userId,
-                                         @RequestParam(value = "from", defaultValue = "0", required = false) int from,
-                                         @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
+                                         @PositiveOrZero @RequestParam(value = "from", defaultValue = "0", required = false) int from,
+                                         @Positive @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
         return itemService.getAll(userId, from, size);
     }
 
     @GetMapping("/search")
     public ResponseEntity<Object> search(@RequestParam(value = "text") String query,
-                                         @RequestParam(value = "from", defaultValue = "0", required = false) int from,
-                                         @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
+                                         @PositiveOrZero @RequestParam(value = "from", defaultValue = "0", required = false) int from,
+                                         @Positive @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
         return itemService.search(query, from, size);
     }
 
